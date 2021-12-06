@@ -7,5 +7,6 @@
 int checkBlockType(int blockID);
 void printBlock(int blockID, char b);
 void printChessBoard(char *state);
+void changeState(char *state,int start, int end, char b);
 
 #endif

@@ -72,3 +72,9 @@ void printChessBoard(char *state){
     // printf("%c",state[i]);
   }
 }
+void changeState(char *state,int start, int end, char b){
+  if(start != 0){
+    state[start-1] = basic[start-1];
+  }
+  state[end-1] = b;
+}
