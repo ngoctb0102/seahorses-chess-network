@@ -3,7 +3,7 @@
 
 #ifndef __CHESSBOARD_H__
 #define __CHESSBOARD_H__
-
+#define BASIC "************************************************123456123456123456123456"
 int checkBlockType(int blockID);
 void printBlock(int blockID, char b);
 void printChessBoard(char *state);

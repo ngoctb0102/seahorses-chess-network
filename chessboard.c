@@ -43,6 +43,7 @@ int checkBlockType(int blockID){
   }
   return 0; //Error !!
 }
+
 void printBlock(int blockID, char b){
   int type = checkBlockType(blockID);
   if(type == 1){
@@ -64,6 +65,7 @@ void printBlock(int blockID, char b){
     printf("  %c",b);
   }
 }
+
 void printChessBoard(char *state){
   for(int i = 0;i<72;i++){
     int order = print_order[i];
@@ -72,6 +74,7 @@ void printChessBoard(char *state){
     // printf("%c",state[i]);
   }
 }
+
 void changeState(char *state,int start, int end, char b){
   if(start != 0){
     state[start-1] = basic[start-1];
