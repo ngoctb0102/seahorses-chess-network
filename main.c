@@ -7,3 +7,4 @@ int main(){
   changeState(state,0,1,'R');
   printChessBoard(state);
 }
+

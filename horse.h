@@ -1,3 +1,6 @@
+#include<stdio.h>
+#include<string.h>
+
 #ifndef __HORSE_H__
 #define __HORSE_H__
 
@@ -9,6 +12,6 @@ typedef struct {
 }Horse;
 
 Horse *makeHorse(char printChar, int color, int setStep);
-Horse *updatePos(Horse horse,int move_num)
+Horse updatePos(Horse horse,int move_num);
 
 #endif

@@ -13,10 +13,10 @@ typedef struct{
 }Game;
 
 Game *makeGame(int roomID, int playerNum, char username1[],char username2[], char username3[], char username4[]);
-Game *updateGame(Game game, int playerIndex,int horseIndex, int move_num);
+Game *updateGame(Game *game, int playerIndex,int horseIndex, int move_num);
 int playerChar(char c);
-int checkCanMove(char *state, Horse horse, int move_num);
+int checkCanMove(char *state, Horse *horse, int move_num);
 int rollDice();
-int ChessInBoard(Player p);
+int ChessInBoard(Player *p);
 
 #endif

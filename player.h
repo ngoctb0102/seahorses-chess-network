@@ -3,15 +3,15 @@
 
 #include "horse.h"
 
-typedef struct {
+typedef struct Player{
   char username[100];
   int playOrder;
   Horse horse[4];
   char printChar;
-}Player;
+} Player;
 
 Player *makePlayer(char username[], int playOrder, char printChar, int color);
-int getTotalPos(Player p);
-int checkWin(Player p);
+int getTotalPos(Player *p);
+int checkWin(Player *p);
 
 #endif
