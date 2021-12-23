@@ -97,7 +97,8 @@ Game *updateGame(Game *game, int playerIndex,int horseIndex, int move_num){
   int start = game->p[playerIndex].horse[horseIndex].step[pos - 1];
   game->p[playerIndex].horse[horseIndex] = updatePos(game->p[playerIndex].horse[horseIndex], move_num);
   int end = game->p[playerIndex].horse[horseIndex].step[pos + move_num - 1];
-  if(game->state[end-1] != '*'){
+  char kick = game->state[end-1];
+  if(kick != '*' && kick != '1' && kick != '2' && kick != '3' && kick != '4' && kick != '5' && kick != '6' ){
     int playerID = playerChar(game->state[end-1]);
     for(int i = 0;i<4;i++){
       int tempPos = game->p[playerID].horse[i].position;

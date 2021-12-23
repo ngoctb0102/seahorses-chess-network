@@ -1,5 +1,10 @@
 #include<stdio.h>
 #include "chessboard.h"
+#define RED  "\x1B[31m"
+#define GRN  "\x1B[32m"
+#define YEL  "\x1B[33m"
+#define BLU  "\x1B[34m"
+#define RESET "\x1B[0m"
 //basic chess board
 char *basic = "************************************************123456123456123456123456";
 //print order
@@ -44,26 +49,42 @@ int checkBlockType(int blockID){
   return 0; //Error !!
 }
 
+void printSingle(char b){
+  if(b == 'R'){
+    printf(RED "%c" RESET,b);
+  }else if(b == 'G'){
+    printf(GRN "%c" RESET,b);
+  }else if(b == 'B'){
+    printf(BLU "%c" RESET,b);
+  }else if(b == 'Y'){
+    printf(YEL "%c" RESET,b);
+  }else{
+    printf("%c",b);
+  }
+}
+
 void printBlock(int blockID, char b){
   int type = checkBlockType(blockID);
   if(type == 1){
-    printf("\n                              %c",b);
+    printf("\n                              ");
+
   }
   if(type == 2){
-    printf("     %c",b);
+    printf("     ");
   }
   if(type == 3){
-    printf("           %c",b);
+    printf("           ");
   }
   if(type == 4){
-    printf("\n                                    %c",b);
+    printf("\n                                    ");
   }
   if(type == 5){
-    printf("\n%c",b);
+    printf("\n");
   }
   if(type == 6){
-    printf("  %c",b);
+    printf("  ");
   }
+  printSingle(b);
 }
 
 void printChessBoard(char *state){
