@@ -4,7 +4,7 @@
 #include "horse.h"
 #include "game.h"
 #include "chessboard.h"
-char *basic = "************************************************123456123456123456123456";
+char *basicChess = "************************************************123456123456123456123456";
 
 Game *makeGame(int roomID, int playerNum, char username1[],char username2[], char username3[], char username4[]){
   Game *game = (Game*)malloc(sizeof(Game));
@@ -22,7 +22,7 @@ Game *makeGame(int roomID, int playerNum, char username1[],char username2[], cha
     Player *p4 = makePlayer(username4, 3, CHARPRINT[3], 3);
     game->p[3] = *p4;
   }
-  strcpy(game->state,basic);
+  strcpy(game->state,basicChess);
   return game;
 }
 //get number chess in board
