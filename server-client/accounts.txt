@@ -1,4 +1,4 @@
 3
-long longkkrr14 0
-tuanvu abc 0
-ngoc xyz 0
+long longkkrr14
+tuanvu abc
+ngoc xyz

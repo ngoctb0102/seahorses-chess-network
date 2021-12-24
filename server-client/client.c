@@ -66,16 +66,6 @@ int main(int argc, const char * argv[]) {
                 default: printf("\nKhong hieu? Chon lai di.\n"); break;
             }
         } while(choice != 2);
-
-        // int send_status= send(network_socket,msg, MSG_LEN ,0);
-        // if (strcmp(msg,"exit")==0){
-        //     break;
-        // }
-        // //print out the server's response
-        // recv(network_socket, response, 100, 0);
-        // printf("Here is the echo message from the server: %s\n\n", response);
-        // // flush response
-        // strcpy(response, "");
 	}
     //close the socket
     close(network_socket);
@@ -115,6 +105,7 @@ void logout(int sock){
     strcpy(buff, "logout-");
     strcat(buff, current_user_name);
     send(sock, buff, MSG_LEN, 0);
+    recv(sock, buff, MSG_LEN, 0);
     strcpy(current_user_name, "");
 }
 

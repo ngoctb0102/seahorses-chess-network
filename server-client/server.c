@@ -6,37 +6,58 @@
 #include <pthread.h>
 #include <string.h>
 #include "util.h"
+#include "user/user.h"
 
+#define MAX_CLIENT_ALLOWED 20
 #define SEND_RECV_LEN 100
 #define MAX_ROOM_ALLOWED 4
 #define MAX_PLAYER_PER_ROOM 4
 #define MSG_NUM 10
 
-//--------------------Globals--------------------
+//------------------Globals----------------------
 
-int current_no_room; //
-int rooms[MAX_ROOM_ALLOWED][MAX_PLAYER_PER_ROOM];
+int current_no_room; // current number of room on server
+int total_user;
+int current_no_user;
+int server_socket;
+UserNode* users;
 
+//-----------------Functions---------------------
 
 //Remember to use -pthread when compiling this server's source code
 void *connection_handler(void *);
-
-// This function resolve message from client
 void resolve(char* client_message, int socket);
 
 void initGlobals(){
+	printf("\n=====================================");
+	printf("\nSetting up globals.....");
 	current_no_room = 0;
-	for(int i = 0; i < MAX_ROOM_ALLOWED; i++)
-		for(int j = 0; j < MAX_PLAYER_PER_ROOM; j++)
-			rooms[i][j] = -1;
+	current_no_user = 0;
+	FILE* fp = fopen("accounts.txt", "r");
+	if(fp == NULL){
+		printf("\n[ERROR] Unable to open accounts db");
+		exit(1);
+	}
+    char username[100];
+    char passwd[100];
+    fscanf(fp, "%d\n", &total_user);
+    for(int i = 1; i <= total_user; i++){
+        fscanf(fp, "%s %s\n", username, passwd);
+        users = addUser(users, username, passwd);
+    }
+	printf("\nDone setup globals");
+	printf("\n=====================================\n");
 }
 
 //-------------------------- Main --------------------------
 
 int main()
 {
+	// init globals
+	initGlobals();
+
     char server_message[100] = "Hello from Server!!\n";
-    int server_socket;
+    // int server_socket;
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
 	
     if (server_socket==-1){
@@ -60,10 +81,7 @@ int main()
 		printf("Listen failed...\n"); 
         exit(0); 
     } 
-    else printf("Server listening..\n"); 
-    
-	// init globals
-	initGlobals();
+    else printf("Server listening..\n");
 
     int no_threads=0; // number of threads accepted
     pthread_t threads[3];
@@ -82,7 +100,7 @@ int main()
 			exit(0); 
 		} 
 		else printf("Server acccept the client...\n");
-		puts("Handler assigned");
+		puts("Handler assigned\n");
 		no_threads++;
 	}
 	int k=0;
@@ -103,10 +121,10 @@ void *connection_handler(void *client_socket){
 	int read_len;
 	char server_message[100]="Hello from server\n";
 	int send_status;
-    send_status=send(socket, server_message, 100, 0);
+    send_status=send(socket, server_message, SEND_RECV_LEN, 0);
 	char client_message[100];
 	char result_data[100];
-	while( (read_len=recv(socket,client_message, 100,0))>0)
+	while( (read_len=recv(socket,client_message, SEND_RECV_LEN,0))>0)
 	{
 		//end of string marker
 		client_message[read_len] = '\0';
@@ -116,43 +134,34 @@ void *connection_handler(void *client_socket){
 		//Send the message back to client
 		// send_status=send(socket , result_data , 100 ,0);	
 	}
-	
 	return 0;
 }
 
 //----------------------------------------------------------------------
 
 void login(char** msg, int socket) {
-	FILE* readfp = fopen("accounts.txt", "r");
-	int no_accounts;
-	char username[50];
-	char password[50];
-	int active;
 	printf("\nrecv: <%s><%s><%s>", msg[0], msg[1], msg[2]);
-	fscanf(readfp, "%d\n", &no_accounts);
-	printf("\n%d\n", no_accounts);
-	for(int i = 1; i <= no_accounts; i++){
-		fscanf(readfp, "%s %s %d\n", username, password, &active);
-		printf("\n<%s><%s><%d>", username, password, active);
-		if(strcmp(username, msg[1]) == 0 && strcmp(password, msg[2]) == 0){
-			if(active == 1) {
-				send(socket, "Tai khoan dang hoat dong.", 100, 0);
-			}
-			else {
-				send(socket, "Dang nhap thanh cong", 100, 0);
-				// chuyen active thanh 1, chua lam
-			}
-			fclose(readfp);
-			return;
+	UserNode* node = searchUser(users, msg[1]);
+	if(node == NULL){
+		send(socket, "Tai khoan khong ton tai", 100, 0);
+	}
+	else {
+		if(updateUserStatus(users, msg[1], ONLINE))
+			send(socket, "Dang nhap thanh cong", SEND_RECV_LEN, 0);
+		else{
+			send(socket, "Tai khoan dang hoat dong.", SEND_RECV_LEN, 0);
 		}
 	}
-	send(socket, "Tai khoan khong ton tai", 100, 0);
-	// strcpy(result, "Tai khoan khong hop le.");
-	fclose(readfp);
+}
+
+void logout(char** msg, int sock){
+	// TODO
+	if(updateUserStatus(users, msg[1], OFFLINE))
+		send(sock, "Dang xuat thanh cong", SEND_RECV_LEN, 0);
 }
 
 void unknownMsg(int socket){
-	send(socket, "Khong ro cau lenh", 100, 0);
+	send(socket, "Khong ro cau lenh", SEND_RECV_LEN, 0);
 }
 
 void createRoom(char** msg, int sock){
