@@ -6,13 +6,19 @@
 #include <string.h>
 #define MSG_LEN 100
 
+//----------Globals--------------
+
+char current_user_name[100];
+
 //----------Functions------------
 
 int login(int sock);
+void logout(int sock);
 void home(int sock);
-void requestCreateRoom();
+void requestCreateRoom(int sock);
 void requestJoinRoom();
 void requestFindRoom();
+void toRoomLobby(int sock);
 
 //------------------------------
 
@@ -90,39 +96,64 @@ int login(int sock){
         if(strcmp(username, "quit") == 0)
             return 0;
         printf("\n> Mat khau: "); scanf("%s", password);
-        strcpy(message, "lgi#");
+        strcpy(message, "lgi-");
         strcat(message, username);
-        strcat(message, "#");
+        strcat(message, "-");
         strcat(message, password);
         send(sock, message, MSG_LEN , 0);
         recv(sock, response, MSG_LEN, 0);
         printf("\n%s", response);
-        if(strcmp(response, "Dang nhap thanh cong") == 0)
+        if(strcmp(response, "Dang nhap thanh cong") == 0){
+            strcpy(current_user_name, username);
             return 1;
+        }
     }
+}
+
+void logout(int sock){
+    char buff[100];
+    strcpy(buff, "logout-");
+    strcat(buff, current_user_name);
+    send(sock, buff, MSG_LEN, 0);
+    strcpy(current_user_name, "");
 }
 
 void home(int sock){
     int choice;
     do {
-        printf("\n----Sanh cho----");
+        printf("\n-----------Sanh cho-----------");
+        printf("\nXin chao %s", current_user_name);
         printf("\n1. Tao phong");
         printf("\n2. Tham gia phong");
         printf("\n3. Tim phong choi");
         printf("\n4. Thoat");
         printf("\nLua chon cua ban: "); scanf("%d", &choice);
         switch(choice){
-            case 1: requestCreateRoom(); break;
+            case 1: requestCreateRoom(sock); break;
             case 2: requestJoinRoom(); break;
             case 3: requestFindRoom(); break;
-            case 4: break;
+            case 4: logout(sock); break;
             default: printf("\nLa sao? Nhap lai coi\n"); break;
         }
     } while(choice != 4);
 }
 
-void requestCreateRoom(){
+void requestCreateRoom(int sock){
     // TODO
+    char buff[100];
+    char res[100];
+    strcpy(buff, "newroom");
+    strcat(buff, "-");
+    strcat(buff, current_user_name);
+    send(sock, buff, MSG_LEN, 0);
+    recv(sock, res, MSG_LEN, 0);
+    if(strcmp(res, "newroom#success") == 0){
+        printf("\n >> From server: Tao phong thanh cong\n");
+        toRoomLobby(sock);
+    }
+    else{
+        printf("\n >> From server: Tao phong khong thanh cong\n");
+    }
 }
 
 void requestJoinRoom(){
@@ -131,4 +162,22 @@ void requestJoinRoom(){
 
 void requestFindRoom(){
     // TODO
+}
+
+void toRoomLobby(int sock){
+    int choice;
+    int room_no = 1;
+    do{
+        printf("\n-------------Phong choi %d-------------", room_no);
+        printf("\n1. %s (chu phong)", current_user_name);
+        printf("\n----------");
+        printf("\n1. Bat dau van dau");
+        printf("\n2. Thoat");
+        printf("\nLua chon cua ban: "); scanf("%d", &choice);
+        switch(choice){
+            case 1: break;
+            case 2: break;
+            default: printf("\nKhong ro cau lenh.\n"); break;
+        }
+    } while(choice != 2);
 }
