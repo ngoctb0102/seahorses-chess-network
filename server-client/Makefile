@@ -1,7 +1,7 @@
 all: server client
 
-server: server.o util.o
-	gcc server.o util.o -pthread -o server
+server: server.o util.o user.o
+	gcc server.o util.o user.o -pthread -o server
 
 server.o: server.c
 	gcc -c -Wall server.c
@@ -14,6 +14,9 @@ client.o: client.c
 
 util.o: util.c
 	gcc -c -Wall util.c
+
+user.o: user/user.c
+	gcc -c -Wall user/user.c
 
 clean:
 	rm -f *.o *~
