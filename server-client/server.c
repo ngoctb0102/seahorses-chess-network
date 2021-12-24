@@ -7,11 +7,31 @@
 #include <string.h>
 #include "util.h"
 
+#define SEND_RECV_LEN 100
+#define MAX_ROOM_ALLOWED 4
+#define MAX_PLAYER_PER_ROOM 4
+#define MSG_NUM 10
+
+//--------------------Globals--------------------
+
+int current_no_room; //
+int rooms[MAX_ROOM_ALLOWED][MAX_PLAYER_PER_ROOM];
+
+
 //Remember to use -pthread when compiling this server's source code
 void *connection_handler(void *);
 
 // This function resolve message from client
 void resolve(char* client_message, int socket);
+
+void initGlobals(){
+	current_no_room = 0;
+	for(int i = 0; i < MAX_ROOM_ALLOWED; i++)
+		for(int j = 0; j < MAX_PLAYER_PER_ROOM; j++)
+			rooms[i][j] = -1;
+}
+
+//-------------------------- Main --------------------------
 
 int main()
 {
@@ -42,6 +62,9 @@ int main()
     } 
     else printf("Server listening..\n"); 
     
+	// init globals
+	initGlobals();
+
     int no_threads=0; // number of threads accepted
     pthread_t threads[3];
     while (no_threads<3){
@@ -132,11 +155,31 @@ void unknownMsg(int socket){
 	send(socket, "Khong ro cau lenh", 100, 0);
 }
 
+void createRoom(char** msg, int sock){
+	if(current_no_room == MAX_ROOM_ALLOWED){
+		send(sock, "newroom#fail", SEND_RECV_LEN, 0);
+		return;
+	}
+	current_no_room++;
+	printf("\ncurrent_no_room = %d", current_no_room);
+	send(sock, "newroom#success", SEND_RECV_LEN, 0);
+}
+
 void resolve(char* client_msg, int socket){
-	char* melted_msg[10];
+	char* melted_msg[MSG_NUM];
 	int ele_count = meltMsg(client_msg, melted_msg);
-	if(strcmp(melted_msg[0], "lgi") == 0)
+	if(strcmp(melted_msg[0], "lgi") == 0){
 		login(melted_msg, socket);
+		return;
+	}
+	if(strcmp(melted_msg[0], "newroom") == 0){
+		createRoom(melted_msg, socket);
+		return;
+	}
+	if(strcmp(melted_msg[0], "logout") == 0){
+		logout(melted_msg, socket);
+		return;
+	}
 	else {
 		unknownMsg(socket);
 	}
