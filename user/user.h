@@ -1,5 +1,6 @@
 #ifndef __USER_H__
 #define __USER_H__
+#define LEN 100
 
 // User status
 typedef enum {
@@ -10,10 +11,9 @@ typedef enum {
 
 // User node for User BST
 typedef struct UserNode {
-    char username[100];
-    char password[100];
+    char username[LEN];
+    char password[LEN];
     UserStatus status;
-    int room_id;
     struct UserNode *left, *right;
 } UserNode;
 
