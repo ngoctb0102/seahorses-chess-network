@@ -6,21 +6,22 @@
 #include <pthread.h>
 #include <string.h>
 #include "util.h"
-#include "user/user.h"
+#include "../user/user.h"
+#include "../room/room.h"
 
 #define MAX_CLIENT_ALLOWED 20
 #define SEND_RECV_LEN 100
-#define MAX_ROOM_ALLOWED 4
-#define MAX_PLAYER_PER_ROOM 4
 #define MSG_NUM 10
 
 //------------------Globals----------------------
 
 int current_no_room; // current number of room on server
+int room_idx;
 int total_user;
 int current_no_user;
 int server_socket;
 UserNode* users;
+RoomNode* rooms;
 
 //-----------------Functions---------------------
 
@@ -33,6 +34,7 @@ void initGlobals(){
 	printf("\nSetting up globals.....");
 	current_no_room = 0;
 	current_no_user = 0;
+	rooms = NULL;
 	FILE* fp = fopen("accounts.txt", "r");
 	if(fp == NULL){
 		printf("\n[ERROR] Unable to open accounts db");
@@ -45,6 +47,7 @@ void initGlobals(){
         fscanf(fp, "%s %s\n", username, passwd);
         users = addUser(users, username, passwd);
     }
+	fclose(fp);
 	printf("\nDone setup globals");
 	printf("\n=====================================\n");
 }
@@ -61,7 +64,7 @@ int main()
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
 	
     if (server_socket==-1){
-		perror("Socket initialisation failed");
+		perror("Socket initialization failed");
 		exit(EXIT_FAILURE);
 	} else printf("Server socket created successfully\n");
 
@@ -84,8 +87,8 @@ int main()
     else printf("Server listening..\n");
 
     int no_threads=0; // number of threads accepted
-    pthread_t threads[3];
-    while (no_threads<3){
+    pthread_t threads[MAX_CLIENT_ALLOWED];
+    while (no_threads < MAX_CLIENT_ALLOWED){
 		printf("Listening...\n");
 		int client_socket = accept(server_socket, NULL, NULL);
 		puts("Connection accepted");
@@ -104,7 +107,7 @@ int main()
 		no_threads++;
 	}
 	int k=0;
-    for (k=0;k<3;k++){
+    for (k=0; k < MAX_CLIENT_ALLOWED; k++){
 		pthread_join(threads[k],NULL);
 	}
 
@@ -164,14 +167,17 @@ void unknownMsg(int socket){
 	send(socket, "Khong ro cau lenh", SEND_RECV_LEN, 0);
 }
 
-void createRoom(char** msg, int sock){
+void createNewRoom(char** msg, int sock){
 	if(current_no_room == MAX_ROOM_ALLOWED){
-		send(sock, "newroom#fail", SEND_RECV_LEN, 0);
+		send(sock, "newroom-full", SEND_RECV_LEN, 0);
 		return;
 	}
 	current_no_room++;
+	addRoom(rooms, room_idx, msg[1]);
 	printf("\ncurrent_no_room = %d", current_no_room);
-	send(sock, "newroom#success", SEND_RECV_LEN, 0);
+	char buff[100];
+	snprintf(buff, sizeof(buff), "newroom-success-%d", room_idx++);
+	send(sock, buff, SEND_RECV_LEN, 0);
 }
 
 void resolve(char* client_msg, int socket){
@@ -182,7 +188,7 @@ void resolve(char* client_msg, int socket){
 		return;
 	}
 	if(strcmp(melted_msg[0], "newroom") == 0){
-		createRoom(melted_msg, socket);
+		createNewRoom(melted_msg, socket);
 		return;
 	}
 	if(strcmp(melted_msg[0], "logout") == 0){
