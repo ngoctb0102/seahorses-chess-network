@@ -41,17 +41,24 @@ int rollDice(){
   return r;
 }
 //check horse can move or not
-int checkCanMove(char *state, Horse *horse, int move_num){
-  int position = horse->position;
+int checkCanMove(char *state, Horse horse, int move_num){
+  int position = horse.position;
+  if(position == 0){
+    if(move_num > 1){
+      return 0;
+    }else{
+      return 1;
+    }
+  } 
   if(position < 48 && (position + move_num) > 48) return 0;
   for(int i = 1; i < move_num + 1;i++){
-	  int block_id = horse->step[position - 1] - 1;
+	  int block_id = horse.step[position - 1] - 1;
 	  char pos = state[block_id + i];
     if(position < 48){
       if(pos != '*' && i < move_num){
         return 0; 
       }
-      if(pos == horse->printChar && i == move_num){
+      if(pos == horse.printChar && i == move_num){
         return 0; 
       }
       return 1;
@@ -61,7 +68,7 @@ int checkCanMove(char *state, Horse *horse, int move_num){
       else{
         for(int j = 1;j < move_num+1;j++){
           char pos = state[block_id+j];
-          if(pos == horse->printChar) return 0;
+          if(pos == horse.printChar) return 0;
         }
         return 1;
       }
@@ -70,7 +77,7 @@ int checkCanMove(char *state, Horse *horse, int move_num){
       if(position == 54) return 0;
       if(move_num > 1) return 0;
       else{
-        if(state[horse->step[position] - 1] == horse->printChar) return 0;
+        if(state[horse.step[position] - 1] == horse.printChar) return 0;
         return 1;
       }
     } 
@@ -110,4 +117,60 @@ Game *updateGame(Game *game, int playerIndex,int horseIndex, int move_num){
   }
   changeState(game->state,start,end,game->p[playerIndex].printChar);
   return game;
+}
+
+int moveNum(int pos, int dice){
+  if(pos == 0){
+    if(dice == 1 || dice == 6){
+      return 1;
+    }else{
+      return dice;
+    }
+  }
+  if(pos > 48){
+    if(dice == pos-48+1){
+      return 1;
+    }else{
+      return dice;
+    }
+  }
+  return dice;
+}
+
+//0 xuat quan, 1 tien len, 2 len chuong
+void getOption(char *finalresult, Game *game, int playerIndex, int dice){
+  char result[12] = "";
+  int totalMove = 0;
+  for(int i = 0;i < 4; i++){
+    char re[3];
+    int pos = game->p[playerIndex].horse[i].position;
+    int move_num = moveNum(pos,dice);
+    int check = checkCanMove(game->state, game->p[playerIndex].horse[i], move_num);
+    if(check == 1){
+      totalMove += 1;
+      if(pos == 0){
+        re[1] = '0';
+      }else if(pos >= 48){
+        re[1] = '2';
+      }else{
+        re[1] = '1';
+      }
+      re[0] = i + 48;
+      re[2] = move_num + 48;
+      strcat(result,re);
+    }
+  }
+  char Final[13] = "";
+  Final[0] = totalMove + 48;
+  strcat(Final,result);
+  strcpy(finalresult, Final);
+}
+
+void printGame(Game *game){
+  for(int i = 0; i < 4; i++){
+    printf("Player %d\n", i);
+    for(int j = 0;j < 4;j++){
+      printf("Con ngua thu %d: %d\n",j,game->p[i].horse[j].position);
+    }
+  }
 }

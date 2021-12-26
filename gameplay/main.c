@@ -20,27 +20,24 @@ int main(){
   printf("\n");
   printf("\n");
   game1 = updateGame(game1,3, 2, 1);
+  printGame(game1);
   printChessBoard(game1->state);
   printf("\n");
   printf("\n");
   printf("\n");
   game1 = updateGame(game1,2, 2, 1);
+  printGame(game1);
   printChessBoard(game1->state);
   printf("\n");
   printf("\n");
   printf("\n");
   game1 = updateGame(game1,2, 2, 3);
-  game1 = updateGame(game1,1, 0, 53);
-  game1 = updateGame(game1,1, 1, 50);
-  game1 = updateGame(game1,1, 2, 44);
-  game1 = updateGame(game1,0, 0, 54);
-  game1 = updateGame(game1,0, 1, 53);
-  game1 = updateGame(game1,0, 2, 52);
-  game1 = updateGame(game1,3, 3, 9);
-  game1 = updateGame(game1,0, 3, 51);
+  game1 = updateGame(game1,2, 0, 1);
+  printGame(game1);
   printChessBoard(game1->state);
-  printf("\n player " RED "p1" RESET " Win !!\n");
-
+  char mes[13] = "";
+  getOption(mes,game1,2,4);
+  printf("\n%s\n", mes);
   return 0;
 
 }
