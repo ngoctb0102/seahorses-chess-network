@@ -47,7 +47,12 @@ int checkCanMove(char *state, Horse horse, int move_num){
     if(move_num > 1){
       return 0;
     }else{
-      return 1;
+      char pos = state[horse.step[position] - 1];
+      if(pos != horse.printChar){
+        return 1;
+      }else{
+        return 0;
+      }
     }
   } 
   if(position < 48 && (position + move_num) > 48) return 0;
@@ -121,20 +126,20 @@ Game *updateGame(Game *game, int playerIndex,int horseIndex, int move_num){
 
 int moveNum(int pos, int dice){
   int result = dice;
-  // if(pos == 0){
-  //   if(dice == 1 || dice == 6){
-  //     result = 1;
-  //   }else{
-  //     result = dice;
-  //   }
-  // }
-  // if(pos > 48){
-  //   if(dice == pos-48+1){
-  //     result =  1;
-  //   }else{
-  //     result = dice;
-  //   }
-  // }
+  if(pos == 0){
+    if(dice == 1 || dice == 6){
+      result = 1;
+    }else{
+      result = dice;
+    }
+  }
+  if(pos > 48){
+    if(dice == pos-48+1){
+      result =  1;
+    }else{
+      result = dice;
+    }
+  }
   return result;
 }
 
