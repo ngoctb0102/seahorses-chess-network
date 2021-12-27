@@ -4,26 +4,17 @@
 #include "room.h"
 
 void main(){
-    int i = 0;
-    RoomNode* root = NULL;
-    root = addRoom(root, i++, "long");
-    addUserToRoom(root, 0, "longhoang");
-    root = addRoom(root, i++, "tuanvu");
-    root = addRoom(root, i++, "profngoc");
-    root = addRoom(root, i++, "abc");
-    addUserToRoom(root, 3, "xxx");
-    addUserToRoom(root, 0, "blank");
-    printRoomTree(root);
-    startGame(root, 0);
-    startGame(root, 3);
-    printRoomTree(root);
-    printf("remove longhoang in room 0\n");
-    removeUserFromRoom(&root, 0, "longhoang");
-    printRoomTree(root);
-    printf("del room 2\n");
-    delRoom(&root, 2);
-    printRoomTree(root);
-    printf("remove long (roomaster) from room 0\n");
-    removeUserFromRoom(&root, 0, "long");
-    printRoomTree(root);
+    Room* rooms[MAX_ROOM_ALLOWED];
+    for(int i = 0; i < MAX_ROOM_ALLOWED; i++)
+        rooms[i] = NULL;
+    addRoom(rooms, "long");
+    addRoom(rooms, "tuanvu");
+    addRoom(rooms, "ngocprof");
+    printRooms(rooms);
+    puts("\n=====================");
+    addUserToRoom(rooms, 2, "hieu");
+    printRooms(rooms);
+    puts("\n=====================");
+    removeUserFromRoom(rooms, 1, "tuanvu");
+    printRooms(rooms);
 }
