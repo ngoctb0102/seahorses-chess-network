@@ -1,6 +1,9 @@
 #ifndef __MESSAGE_H_
 #define __MESSAGE_H_
 
+//Defing send and receive buffer length
+#define SEND_RECV_LEN 100
+
 //Define the message prefix between client and server
 
 #define LOGINS "LOGINS"             // [from SERVER] require: client(s) to login

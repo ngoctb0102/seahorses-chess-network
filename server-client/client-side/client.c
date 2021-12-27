@@ -4,28 +4,23 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
-#include "util.h"
-#include "../room/room.h"
+#include "../util.h"
+#include "../../room/room.h"
+#include "client_user.h"
+#include "client_home.h"
+#include "../message.h"
 
-#define MSG_LEN 100
-
-//----------Globals--------------
+//-------------Globals-----------------
 
 char current_user_name[100];
-RoomNode* my_room = NULL;
+Room* my_room = NULL;
 
-//----------Functions------------
+//----------User Interfaces------------
 
-void initGlobals();
-int login(int sock);
-void logout(int sock);
 void home(int sock);
-void requestCreateRoom(int sock);
-void requestJoinRoom();
-void requestFindRoom();
-void toRoomLobby(int sock);
+void roomLobby(int sock);
 
-//------------------------------
+//------------------------------------
 
 int main(int argc, const char * argv[]) {
     //create a socket
@@ -50,7 +45,7 @@ int main(int argc, const char * argv[]) {
         char response[256];
         // char msg[256];
         //receive data from the server
-        recv(network_socket, response, MSG_LEN, 0);
+        recv(network_socket, response, SEND_RECV_LEN, 0);
         printf(">> %s\n", response);
         int choice;
         //char response[256];
@@ -66,7 +61,7 @@ int main(int argc, const char * argv[]) {
                         home(network_socket);
                     } break;
                 case 2: 
-                    send(network_socket, "exit", MSG_LEN, 0);
+                    send(network_socket, "exit", SEND_RECV_LEN, 0);
                     printf("\nHen gap lai!!\n"); 
                     break;
                 default: printf("\nKhong hieu? Chon lai di.\n"); break;
@@ -81,41 +76,6 @@ int main(int argc, const char * argv[]) {
 
 //------------------------------------------------------------
 
-int login(int sock){
-    char username[100];
-    char password[100];
-    char message[256];
-    char response[256];
-    while(1){
-        system("clear");
-        printf("\n----Dang nhap----");
-        printf("\n> Ten nguoi dung (go 'quit' de thoat): "); scanf("%s", username);
-        if(strcmp(username, "quit") == 0)
-            return 0;
-        printf("\n> Mat khau: "); scanf("%s", password);
-        strcpy(message, "lgi-");
-        strcat(message, username);
-        strcat(message, "-");
-        strcat(message, password);
-        send(sock, message, MSG_LEN , 0);
-        recv(sock, response, MSG_LEN, 0);
-        printf("\n%s", response);
-        if(strcmp(response, "Dang nhap thanh cong") == 0){
-            strcpy(current_user_name, username);
-            return 1;
-        }
-    }
-}
-
-void logout(int sock){
-    char buff[100];
-    strcpy(buff, "logout-");
-    strcat(buff, current_user_name);
-    send(sock, buff, MSG_LEN, 0);
-    recv(sock, buff, MSG_LEN, 0);
-    strcpy(current_user_name, "");
-}
-
 void home(int sock){
     int choice;
     do {
@@ -128,7 +88,11 @@ void home(int sock){
         printf("\n4. Thoat");
         printf("\nLua chon cua ban: "); scanf("%d", &choice);
         switch(choice){
-            case 1: requestCreateRoom(sock); break;
+            case 1: 
+                requestCreateRoom(sock);
+                if(my_room != NULL)
+                    roomLobby(sock);
+                break;
             case 2: requestJoinRoom(); break;
             case 3: requestFindRoom(); break;
             case 4: logout(sock); break;
@@ -137,38 +101,7 @@ void home(int sock){
     } while(choice != 4);
 }
 
-void requestCreateRoom(int sock){
-    // TODO
-    char buff[100];
-    char res[100];
-    char* melted_msg[10];
-    strcpy(buff, "newroom");
-    strcat(buff, "-");
-    strcat(buff, current_user_name);
-    send(sock, buff, MSG_LEN, 0);
-    recv(sock, res, MSG_LEN, 0);
-    meltMsg(res, melted_msg);
-    if(strcmp(melted_msg[0], "newroom") == 0){
-        if(strcmp(melted_msg[1], "success") == 0){
-            printf("\n >> From server: Tao phong thanh cong\n");
-            my_room = createRoom(atoi(melted_msg[2]), current_user_name);
-            toRoomLobby(sock);
-        }
-        else if(strcmp(melted_msg[1], "full") == 0)
-            printf("\n >> From server: So phong da dat toi da.\n");
-        else printf("\n >> From server: Tao phong khong thanh cong\n");
-    }
-}
-
-void requestJoinRoom(){
-    // TODO
-}
-
-void requestFindRoom(){
-    // TODO
-}
-
-void toRoomLobby(int sock){
+void roomLobby(int sock){
     int choice;
     do{
         system("clear");
@@ -178,7 +111,7 @@ void toRoomLobby(int sock){
         printf("\nLua chon cua ban: "); scanf("%d", &choice);
         switch(choice){
             case 1: break;
-            case 2: break;
+            case 2: exitRoom(sock); break;
             default: printf("\nKhong ro cau lenh.\n"); break;
         }
     } while(choice != 2);

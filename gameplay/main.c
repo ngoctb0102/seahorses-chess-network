@@ -40,12 +40,15 @@ int main(){
   printf("\n");
   char mes[20] = "";
   getOption(mes,game1,2,1);
+<<<<<<< HEAD
   printf("\n%s\n", mes);
   getOption(mes,game1,1,2);
   printf("\n%s\n", mes);
   getOption(mes,game1,2,6);
   printf("\n%s\n", mes);
   getOption(mes,game1,3,5);
+=======
+>>>>>>> origin/main
   printf("\n%s\n", mes);
   return 0;
 

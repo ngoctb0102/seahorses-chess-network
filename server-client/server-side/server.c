@@ -5,25 +5,25 @@
 #include <netinet/in.h>
 #include <pthread.h>
 #include <string.h>
-#include "util.h"
-#include "../user/user.h"
-#include "../room/room.h"
+#include "../util.h"
+#include "../../user/user.h"
+#include "../../room/room.h"
+#include "server_room.h"
+#include "server_user.h"
+#include "../message.h"
 
 #define MAX_CLIENT_ALLOWED 20
-#define SEND_RECV_LEN 100
 #define MSG_NUM 10
 
 //------------------Globals----------------------
 
 int current_no_room; // current number of room on server
-int room_idx;
 int total_user;
-int current_no_user;
 int server_socket;
 UserNode* users;
-RoomNode* rooms;
+Room* rooms[MAX_ROOM_ALLOWED];
 
-//-----------------Functions---------------------
+//-----------------Base functions---------------------
 
 //Remember to use -pthread when compiling this server's source code
 void *connection_handler(void *);
@@ -33,8 +33,9 @@ void initGlobals(){
 	printf("\n=====================================");
 	printf("\nSetting up globals.....");
 	current_no_room = 0;
-	current_no_user = 0;
-	rooms = NULL;
+	for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
+		rooms[i] = NULL;
+	}
 	FILE* fp = fopen("accounts.txt", "r");
 	if(fp == NULL){
 		printf("\n[ERROR] Unable to open accounts db");
@@ -142,58 +143,48 @@ void *connection_handler(void *client_socket){
 
 //----------------------------------------------------------------------
 
-void login(char** msg, int socket) {
-	printf("\nrecv: <%s><%s><%s>", msg[0], msg[1], msg[2]);
-	UserNode* node = searchUser(users, msg[1]);
-	if(node == NULL){
-		send(socket, "Tai khoan khong ton tai", 100, 0);
-	}
-	else {
-		if(updateUserStatus(users, msg[1], ONLINE))
-			send(socket, "Dang nhap thanh cong", SEND_RECV_LEN, 0);
-		else{
-			send(socket, "Tai khoan dang hoat dong.", SEND_RECV_LEN, 0);
-		}
-	}
-}
+// void login(char** msg, int socket) {
+// 	printf("\nrecv: <%s><%s><%s>", msg[0], msg[1], msg[2]);
+// 	UserNode* node = searchUser(users, msg[1]);
+// 	if(node == NULL){
+// 		send(socket, "Tai khoan khong ton tai", 100, 0); // message
+// 	}
+// 	else {
+// 		if(updateUserStatus(users, msg[1], ONLINE))
+// 			send(socket, "Dang nhap thanh cong", SEND_RECV_LEN, 0); // message
+// 		else{
+// 			send(socket, "Tai khoan dang hoat dong.", SEND_RECV_LEN, 0); // message
+// 		}
+// 	}
+// }
 
-void logout(char** msg, int sock){
-	// TODO
-	if(updateUserStatus(users, msg[1], OFFLINE))
-		send(sock, "Dang xuat thanh cong", SEND_RECV_LEN, 0);
-}
+// void logout(char** msg, int sock){
+// 	// TODO
+// 	if(updateUserStatus(users, msg[1], OFFLINE))
+// 		send(sock, "Dang xuat thanh cong", SEND_RECV_LEN, 0); // message
+// }
 
 void unknownMsg(int socket){
-	send(socket, "Khong ro cau lenh", SEND_RECV_LEN, 0);
-}
-
-void createNewRoom(char** msg, int sock){
-	if(current_no_room == MAX_ROOM_ALLOWED){
-		send(sock, "newroom-full", SEND_RECV_LEN, 0);
-		return;
-	}
-	current_no_room++;
-	addRoom(rooms, room_idx, msg[1]);
-	printf("\ncurrent_no_room = %d", current_no_room);
-	char buff[100];
-	snprintf(buff, sizeof(buff), "newroom-success-%d", room_idx++);
-	send(sock, buff, SEND_RECV_LEN, 0);
+	send(socket, "Khong ro cau lenh", SEND_RECV_LEN, 0); // message
 }
 
 void resolve(char* client_msg, int socket){
 	char* melted_msg[MSG_NUM];
 	int ele_count = meltMsg(client_msg, melted_msg);
-	if(strcmp(melted_msg[0], "lgi") == 0){
+	if(strcmp(melted_msg[0], "lgi") == 0){ // message prefix
 		login(melted_msg, socket);
 		return;
 	}
-	if(strcmp(melted_msg[0], "newroom") == 0){
-		createNewRoom(melted_msg, socket);
+	if(strcmp(melted_msg[0], "newroom") == 0){ // message prefix
+		userCreateRoom(melted_msg, socket);
 		return;
 	}
-	if(strcmp(melted_msg[0], "logout") == 0){
+	if(strcmp(melted_msg[0], "logout") == 0){ // message prefix
 		logout(melted_msg, socket);
 		return;
+	}
+	if(strcmp(melted_msg[0], "exitroom") == 0){ // message prefix
+		userExitRoom(melted_msg, socket);
 	}
 	else {
 		unknownMsg(socket);

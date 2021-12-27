@@ -4,13 +4,11 @@
 
 #include "room.h"
 
-RoomNode* createRoom(int room_id, char* owner){
-    RoomNode* newroom = (RoomNode*) malloc(sizeof(RoomNode));
+Room* createRoom(int room_id, char* owner){
+    Room* newroom = (Room*) malloc(sizeof(Room));
     newroom->game = NULL;
     newroom->room_id = room_id;
     newroom->inroom_no = 1;
-    newroom->left = NULL;
-    newroom->right = NULL;
     newroom->status = WAITING;
     for(int i = 0; i < MAX_PLAYER_PER_ROOM; i++){
         newroom->players[i] = (char*) malloc(100);
@@ -19,34 +17,18 @@ RoomNode* createRoom(int room_id, char* owner){
     return newroom;
 }
 
-RoomNode* addRoom(RoomNode* root, int room_id, char* owner){
-    if(root == NULL) root = createRoom(room_id, owner);
-    else {
-        RoomNode* node = searchRoom(root, room_id);
-        if(node == NULL){
-            if(root->room_id < room_id) root->right = addRoom(root->right , room_id, owner);
-            if(root->room_id > room_id) root->left = addRoom(root->left , room_id, owner);
+int addRoom(Room** root, char* owner){
+    for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
+        if(root[i] == NULL){
+            root[i] = createRoom(i, owner);
+            return i;
         }
     }
-    return root;
 }
 
-RoomNode* searchRoom(RoomNode* root, int room_id){
-    if(root == NULL) return NULL;
-    else {
-        if(root->room_id < room_id)
-            root = searchRoom(root->right, room_id);
-        else {
-            if(root->room_id > room_id)
-                root = searchRoom(root->left, room_id);
-        }
-    }
-    return root;
-}
-
-int addUserToRoom(RoomNode* root, int room_id, char* username){
+int addUserToRoom(Room** root, int room_id, char* username){
     if(root == NULL) return -1;
-    RoomNode* node = searchRoom(root, room_id);
+    Room* node = root[room_id];
     if(node != NULL){
         if(node->inroom_no == MAX_PLAYER_PER_ROOM)
             return -1;
@@ -59,9 +41,9 @@ int addUserToRoom(RoomNode* root, int room_id, char* username){
     return 0;
 }
 
-void removeUserFromRoom(RoomNode** root, int room_id, char* username){
+void removeUserFromRoom(Room** root, int room_id, char* username){
     // TODO
-    RoomNode* node = searchRoom(*root, room_id);
+    Room* node = root[room_id];
     if(node == NULL) return;
     if(strcmp(node->players[0], username) == 0)
         delRoom(root, room_id);
@@ -76,63 +58,46 @@ void removeUserFromRoom(RoomNode** root, int room_id, char* username){
     }
 }
 
-void freeRoom(RoomNode* node){
+void freeRoom(Room* node){
     for(int i = 0; i < MAX_PLAYER_PER_ROOM; i++){
         free(node->players[i]);
     }
     free(node);
 }
 
-void delRoom(RoomNode** root, int room_id){
+void delRoom(Room** root, int room_id){
     // TODO
-    RoomNode* node = searchRoom(*root, room_id);
+    Room* node = root[room_id];
     if(node == NULL) return;
+    freeRoom(node);
+    root[room_id] = NULL;
+}
 
-    // case 1: node is leaf
-    if(node->left == NULL && node->right == NULL){
-        freeRoom(node);
-        node = NULL;
-    }
-    // case 2: node not leaf
-    else if(node->right != NULL){
-        if(node->room_id == (*root)->room_id){
-            *root = (*root)->right;
-        } else {
-            RoomNode* node1 = *root;
-            while(node1->right->room_id != node->room_id)
-                node1 = node1->right;
-            node1->right = node->right;
+void startGame(Room** root, int room_id){
+    // TODO
+    if(root[room_id] == NULL) return;
+    root[room_id]->status = PLAYING;
+}
+
+void printRooms(Room** rooms){
+    for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
+        if(rooms[i] != NULL){
+            printRoom(rooms[i]);
         }
-        freeRoom(node);
     }
 }
 
-void startGame(RoomNode* root, int room_id){
-    // TODO
-    RoomNode* node = searchRoom(root, room_id);
-    if(node == NULL) return;
-    node->status = PLAYING;
-}
-
-void printRoomTree(RoomNode* root){
-    if(root == NULL) return;
-    printRoomTree(root->right);
-    printRoom(root);
-    printRoomTree(root->left);
-    printf("\n");
-}
-
-void printRoom(RoomNode* room){
+void printRoom(Room* room){
     printf("\n------------------Phong choi %d ------------------\n", room->room_id);
     printf("- Trang thai: ");
     switch(room->status){
         case WAITING: printf("dang cho tran dau\n"); break;
         case PLAYING: printf("dang trong tran dau\n"); break;
     }
-    printf("- So nguoi choi hien tai: %d\n>", room->inroom_no);
-    printf("- Nguoi choi:\n");
+    printf("- So nguoi choi hien tai: %d\n", room->inroom_no);
+    printf("- Nguoi choi:");
     printf("\n\t1. %s (chu phong)", room->players[0]);
-    for(int i = 1; i < room->inroom_no; i++){
-        printf("\n\t%d. %s", i+1, room->players[i]);
+    for(int j = 1; j < room->inroom_no; j++){
+        printf("\n\t%d. %s", j+1, room->players[j]);
     }
 }
