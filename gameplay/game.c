@@ -120,50 +120,52 @@ Game *updateGame(Game *game, int playerIndex,int horseIndex, int move_num){
 }
 
 int moveNum(int pos, int dice){
-  if(pos == 0){
-    if(dice == 1 || dice == 6){
-      return 1;
-    }else{
-      return dice;
-    }
-  }
-  if(pos > 48){
-    if(dice == pos-48+1){
-      return 1;
-    }else{
-      return dice;
-    }
-  }
-  return dice;
+  int result = dice;
+  // if(pos == 0){
+  //   if(dice == 1 || dice == 6){
+  //     result = 1;
+  //   }else{
+  //     result = dice;
+  //   }
+  // }
+  // if(pos > 48){
+  //   if(dice == pos-48+1){
+  //     result =  1;
+  //   }else{
+  //     result = dice;
+  //   }
+  // }
+  return result;
 }
 
 //0 xuat quan, 1 tien len, 2 len chuong
 void getOption(char *finalresult, Game *game, int playerIndex, int dice){
-  char result[12] = "";
+  // char result[13] = "";
   int totalMove = 0;
   for(int i = 0;i < 4; i++){
-    char re[3];
+    // char re[3];
     int pos = game->p[playerIndex].horse[i].position;
     int move_num = moveNum(pos,dice);
     int check = checkCanMove(game->state, game->p[playerIndex].horse[i], move_num);
     if(check == 1){
-      totalMove += 1;
       if(pos == 0){
-        re[1] = '0';
+        finalresult[2 + 3*totalMove] = '0';
       }else if(pos >= 48){
-        re[1] = '2';
+        finalresult[2 + 3*totalMove] = '2';
       }else{
-        re[1] = '1';
+        finalresult[2 + 3*totalMove] = '1';
       }
-      re[0] = i + 48;
-      re[2] = move_num + 48;
-      strcat(result,re);
+      finalresult[1 + 3*totalMove] = i + 48;
+      finalresult[3 + 3*totalMove] = move_num + 48;
+      totalMove++;
+      // strcat(result,re);
     }
   }
-  char Final[13] = "";
-  Final[0] = totalMove + 48;
-  strcat(Final,result);
-  strcpy(finalresult, Final);
+  finalresult[0] = totalMove+48;
+  // char fi[13] = "";
+  // fi[0] = totalMove + 48;
+  // strcat(fi,result);
+  // strcpy(finalresult, fi);
 }
 
 void printGame(Game *game){
