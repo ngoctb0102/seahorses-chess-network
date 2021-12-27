@@ -16,12 +16,11 @@
 //------------------Globals----------------------
 
 int current_no_room; // current number of room on server
-int room_idx;
 int total_user;
 int current_no_user;
 int server_socket;
 UserNode* users;
-RoomNode* rooms;
+Room* rooms[MAX_ROOM_ALLOWED];
 
 //-----------------Functions---------------------
 
@@ -34,7 +33,9 @@ void initGlobals(){
 	printf("\nSetting up globals.....");
 	current_no_room = 0;
 	current_no_user = 0;
-	rooms = NULL;
+	for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
+		rooms[i] = NULL;
+	}
 	FILE* fp = fopen("accounts.txt", "r");
 	if(fp == NULL){
 		printf("\n[ERROR] Unable to open accounts db");
@@ -173,11 +174,16 @@ void createNewRoom(char** msg, int sock){
 		return;
 	}
 	current_no_room++;
-	addRoom(rooms, room_idx, msg[1]);
+	int room_id = addRoom(rooms, msg[1]);
 	printf("\ncurrent_no_room = %d", current_no_room);
 	char buff[100];
-	snprintf(buff, sizeof(buff), "newroom-success-%d", room_idx++);
+	snprintf(buff, sizeof(buff), "newroom-success-%d", room_id);
 	send(sock, buff, SEND_RECV_LEN, 0);
+}
+
+void userExitRoom(char** msg, int sock){
+	removeUserFromRoom(rooms, atoi(msg[2]), msg[1]);
+	current_no_room--;
 }
 
 void resolve(char* client_msg, int socket){
@@ -194,6 +200,9 @@ void resolve(char* client_msg, int socket){
 	if(strcmp(melted_msg[0], "logout") == 0){
 		logout(melted_msg, socket);
 		return;
+	}
+	if(strcmp(melted_msg[0], "exitroom") == 0){
+		userExitRoom(melted_msg, socket);
 	}
 	else {
 		unknownMsg(socket);

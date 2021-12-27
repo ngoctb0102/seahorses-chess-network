@@ -12,7 +12,7 @@
 //----------Globals--------------
 
 char current_user_name[100];
-RoomNode* my_room = NULL;
+Room* my_room = NULL;
 
 //----------Functions------------
 
@@ -168,6 +168,15 @@ void requestFindRoom(){
     // TODO
 }
 
+void exitRoom(int sock){
+    char buff[100];
+    snprintf(buff, sizeof(buff), "exitroom-%s-%d", current_user_name, my_room->room_id);
+    send(sock, buff, MSG_LEN, 0);
+    Room* node = my_room;
+    freeRoom(node);
+    my_room = NULL;
+}
+
 void toRoomLobby(int sock){
     int choice;
     do{
@@ -178,7 +187,7 @@ void toRoomLobby(int sock){
         printf("\nLua chon cua ban: "); scanf("%d", &choice);
         switch(choice){
             case 1: break;
-            case 2: break;
+            case 2: exitRoom(sock); break;
             default: printf("\nKhong ro cau lenh.\n"); break;
         }
     } while(choice != 2);
