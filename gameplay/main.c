@@ -35,8 +35,11 @@ int main(){
   game1 = updateGame(game1,2, 0, 1);
   printGame(game1);
   printChessBoard(game1->state);
-  char mes[13] = "";
-  getOption(mes,game1,2,4);
+  printf("\n");
+  printf("\n");
+  printf("\n");
+  char mes[20] = "";
+  getOption(mes,game1,2,1);
   printf("\n%s\n", mes);
   return 0;
 
