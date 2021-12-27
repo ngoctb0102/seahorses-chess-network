@@ -24,7 +24,6 @@ UserNode* addUser(UserNode* root, char* username, char* passwd);
 int updateUserStatus(UserNode*, char* username, UserStatus status);
 void delUserBST(UserNode* root); // unused when server is online, just to safely delete BST when shutdown server.
 UserNode* createUserNode(char* username, char* passwd);
-
 // Data write util
 
 
