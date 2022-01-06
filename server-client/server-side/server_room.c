@@ -28,5 +28,12 @@ void userExitRoom(char** msg, int sock){
 
 void userJoinRoom(char** msg, int sock){
     // TODO
+	char buff[100];
+	switch(addUserToRoom(rooms, atoi(msg[2]), msg[1])){
+		case 0: snprintf(buff, sizeof(buff), "JOINROOM-FAIL-%d", atoi(msg[2])); break;
+		case 1: snprintf(buff, sizeof(buff), "JOINROOM-SUCCESS-%d", atoi(msg[2])); break;
+		case -1: snprintf(buff, sizeof(buff), "JOINROOM-FULL-%d", atoi(msg[2])); break;
+	}
+	send(sock, buff, SEND_RECV_LEN, 0);
 }
 

@@ -43,30 +43,34 @@ int main(int argc, const char * argv[]) {
     if(connection_status==0)
     {
         char response[256];
-        // char msg[256];
         //receive data from the server
         recv(network_socket, response, SEND_RECV_LEN, 0);
         printf(">> %s\n", response);
         int choice;
-        //char response[256];
         do{
             system("clear");
             printf("\n-------------GAME CA NGUA SIEU CAP VJPRO-------------");
             printf("\n1. Dang nhap");
-            printf("\n2. Thoat");
+            printf("\n2. Dang ki");
+            printf("\n3. Thoat");
             printf("\nLua chon cua ban: "); scanf("%d", &choice);
             switch(choice){
                 case 1: 
                     if(login(network_socket)){
                         home(network_socket);
                     } break;
-                case 2: 
+                case 2:
+                    if(signup(network_socket)){
+                        home(network_socket);
+                    }
+                    break;
+                case 3: 
                     send(network_socket, "exit", SEND_RECV_LEN, 0);
                     printf("\nHen gap lai!!\n"); 
                     break;
                 default: printf("\nKhong hieu? Chon lai di.\n"); break;
             }
-        } while(choice != 2);
+        } while(choice != 3);
 	}
     //close the socket
     close(network_socket);
@@ -93,8 +97,12 @@ void home(int sock){
                 if(my_room != NULL)
                     roomLobby(sock);
                 break;
-            case 2: requestJoinRoom(); break;
-            case 3: requestFindRoom(); break;
+            case 2: 
+                requestJoinRoom(sock); 
+                if(my_room != NULL)
+                    roomLobby(sock);
+                break;
+            case 3: requestFindRoom(sock); break;
             case 4: logout(sock); break;
             default: printf("\nLa sao? Nhap lai coi\n"); break;
         }

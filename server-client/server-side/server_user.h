@@ -5,6 +5,7 @@
 
 //-------------Globals----------------
 extern UserNode* users;
+extern int total_user;
 
 //------------Functions---------------
 
