@@ -5,15 +5,28 @@
 #include "room.h"
 
 Room* createRoom(int room_id, char* owner){
+    // Room* newroom = (Room*) malloc(sizeof(Room));
+    // newroom->game = NULL;
+    // newroom->room_id = room_id;
+    // newroom->inroom_no = 1;
+    // newroom->status = WAITING;
+    // for(int i = 0; i < MAX_PLAYER_PER_ROOM; i++){
+    //     newroom->players[i] = (char*) malloc(100);
+    // }
+    Room* newroom = createBlankRoom(room_id);
+    newroom->status = WAITING;
+    newroom->inroom_no = 1;
+    strcpy(newroom->players[0], owner);
+    return newroom;
+}
+
+Room* createBlankRoom(int room_id){
     Room* newroom = (Room*) malloc(sizeof(Room));
     newroom->game = NULL;
-    newroom->room_id = room_id;
-    newroom->inroom_no = 1;
-    newroom->status = WAITING;
+    newroom->inroom_no = 0;
     for(int i = 0; i < MAX_PLAYER_PER_ROOM; i++){
         newroom->players[i] = (char*) malloc(100);
     }
-    strcpy(newroom->players[0], owner);
     return newroom;
 }
 
@@ -41,21 +54,21 @@ int addUserToRoom(Room** root, int room_id, char* username){
     return 0;
 }
 
-void removeUserFromRoom(Room** root, int room_id, char* username){
-    // TODO
+int removeUserFromRoom(Room** root, int room_id, char* username){
     Room* node = root[room_id];
-    if(node == NULL) return;
-    if(strcmp(node->players[0], username) == 0)
+    if(node == NULL) return -1;
+    if(strcmp(node->players[0], username) == 0){
         delRoom(root, room_id);
-    else{
-        int i = 1;
-        while(strcmp(node->players[i], username) != 0) i++;
-        while(i < node->inroom_no-1) {
-            strcpy(node->players[i], node->players[i+1]);
-            i++;
-        }
-        node->inroom_no -= 1;
+        return 0;
     }
+    int i = 1;
+    while(strcmp(node->players[i], username) != 0) i++;
+    while(i < node->inroom_no-1) {
+        strcpy(node->players[i], node->players[i+1]);
+        i++;
+    }
+    node->inroom_no -= 1;
+    return 1;
 }
 
 void freeRoom(Room* node){
@@ -100,4 +113,15 @@ void printRoom(Room* room){
     for(int j = 1; j < room->inroom_no; j++){
         printf("\n\t%d. %s", j+1, room->players[j]);
     }
+}
+
+char* roomToString(Room** root, int room_id){
+    Room* room = root[room_id];
+    char* str = (char*) malloc(100);
+    snprintf(str, sizeof(str), "%d-%d", room->room_id, room->inroom_no);
+    for(int i = 0; i < room->inroom_no; i++){
+        strcat(str, "-");
+        strcat(str, room->players[i]);
+    }
+    return str;
 }

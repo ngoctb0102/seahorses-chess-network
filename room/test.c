@@ -23,21 +23,23 @@ Room* createJoinRoom(int room_id, int inroom_no, char** inroom_players){
 }
 
 void main(){
-    // Room* rooms[MAX_ROOM_ALLOWED];
-    // for(int i = 0; i < MAX_ROOM_ALLOWED; i++)
-    //     rooms[i] = NULL;
-    // addRoom(rooms, "long");
+    Room* rooms[MAX_ROOM_ALLOWED];
+    for(int i = 0; i < MAX_ROOM_ALLOWED; i++)
+        rooms[i] = NULL;
+    addRoom(rooms, "long");
     // addRoom(rooms, "tuanvu");
     // addRoom(rooms, "ngocprof");
     // printRooms(rooms);
     // puts("\n=====================");
-    // addUserToRoom(rooms, 2, "hieu");
-    // printRooms(rooms);
+    addUserToRoom(rooms, 0, "hieu");
+    printRooms(rooms);
     // puts("\n=====================");
     // removeUserFromRoom(rooms, 1, "tuanvu");
     // printRooms(rooms);
-    Room* room = NULL;
-    char* names[100] = {"long", "tuanvu", "ngoc"};
-    room = createJoinRoom(1, 3, names);
-    printRoom(room);
+    char* result = roomToString(rooms, 0);
+    printf("\n<%s, %ld, %ld>\n", result, sizeof(result), strlen(result));
+    // Room* room = NULL;
+    // char* names[100] = {"long", "tuanvu", "ngoc"};
+    // room = createJoinRoom(1, 3, names);
+    // printRoom(room);
 }

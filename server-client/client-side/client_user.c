@@ -43,7 +43,6 @@ void logout(int sock){
 }
 
 int signup(int sock){
-    // TODO
     char username[100];
     char password[100];
     char repassword[100];
