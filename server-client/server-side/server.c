@@ -143,27 +143,6 @@ void *connection_handler(void *client_socket){
 
 //----------------------------------------------------------------------
 
-// void login(char** msg, int socket) {
-// 	printf("\nrecv: <%s><%s><%s>", msg[0], msg[1], msg[2]);
-// 	UserNode* node = searchUser(users, msg[1]);
-// 	if(node == NULL){
-// 		send(socket, "Tai khoan khong ton tai", 100, 0); // message
-// 	}
-// 	else {
-// 		if(updateUserStatus(users, msg[1], ONLINE))
-// 			send(socket, "Dang nhap thanh cong", SEND_RECV_LEN, 0); // message
-// 		else{
-// 			send(socket, "Tai khoan dang hoat dong.", SEND_RECV_LEN, 0); // message
-// 		}
-// 	}
-// }
-
-// void logout(char** msg, int sock){
-// 	// TODO
-// 	if(updateUserStatus(users, msg[1], OFFLINE))
-// 		send(sock, "Dang xuat thanh cong", SEND_RECV_LEN, 0); // message
-// }
-
 void unknownMsg(int socket){
 	send(socket, "Khong ro cau lenh", SEND_RECV_LEN, 0); // message
 }
@@ -185,6 +164,15 @@ void resolve(char* client_msg, int socket){
 	}
 	if(strcmp(melted_msg[0], "exitroom") == 0){ // message prefix
 		userExitRoom(melted_msg, socket);
+		return;
+	}
+	if(strcmp(melted_msg[0], "JOINROOM") == 0){
+		userJoinRoom(melted_msg, socket);
+		return;
+	}
+	if(strcmp(melted_msg[0], "SIGNUP") == 0){
+		signup(melted_msg, socket);
+		return;
 	}
 	else {
 		unknownMsg(socket);

@@ -10,6 +10,6 @@ int login(int sock);
 
 void logout(int sock);
 
-void signup(int sock);
+int signup(int sock);
 
 #endif
