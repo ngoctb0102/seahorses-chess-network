@@ -10,10 +10,13 @@
 #define RESET "\x1B[0m"
 
 int main(){
-  Game *game = makeGame(1, 4, "p1","p2", "p3", "p4");
+  // char noplayer[2] = "no";//cai nay su  dung cho nhung phong thieu ngua
+  //VD: Game *game = makeGame(1, 3, "p1","p2", "p3", noplayer);
+  Game *game = makeGame(2, 3, "p1","p2", "p3", "p4");
   int turn = 0;
-  while(checkEndGame(game) != 3){
-    int pid = turn%4;
+  // printf("%d %d %d",checkEndGame(game), game->playerNum, game->roomID);
+  while(checkEndGame(game) != game->playerNum){
+    int pid = turn%(game->playerNum + 1);
     if(checkWin(game->p[pid]) == 1){
       turn+=1;
       continue;
@@ -31,6 +34,9 @@ int main(){
     }else{
       dice = rollDice();
       printf("nguoi choi %d duoc %d\n",pid,dice);
+      if(dice == 6){
+        turn += game->playerNum;
+      }
     }
     char option[20];
     getOption(option,game,pid,dice);
@@ -41,7 +47,7 @@ int main(){
       continue;
     }
     for(int i =0;i < option[0] - 48;i++){
-      printf("%d: ",i);
+      printf("%d: ",i + 1);
       if(option[3*i + 2]-48 == 0){
         printf("Xuat quan thu %d\n",i+1);
       }else if(option[3*i + 2]-48 == 1){
@@ -54,8 +60,9 @@ int main(){
     int opt;
     scanf("%d",&opt);
     //gui lua chon cua client ve server
-    game = updateGame(game, pid,option[3*opt+1]-48 ,option[3*opt + 3]-48);//updateGame
-    for(int i = 0;i<4;i++){
+    game = updateGame(game, pid,option[3*(opt-1) + 1]-48 ,option[3*(opt-1) + 3]-48);//updateGame
+    printf("horse : %d\n",game->p[pid].horse[option[3*(opt-1)+1]-48].position);
+    for(int i = 0;i<game->playerNum+1;i++){
       if(checkWin(game->p[i]) == 1){
         printf("player %d win\n", i);
       }
