@@ -73,7 +73,7 @@ int checkCanMove(char *state, Horse horse, int move_num){
       printf("%c",state[horse.step[position]]);
       if(state[horse.step[position]-1] != '1') return 0;
       else{
-        for(int j = 1;j < move_num+1;j++){
+        for(int j = 0;j < move_num;j++){
           char poss = state[horse.step[position]-1 +j];
           if(poss == horse.printChar) return 0;
         }
