@@ -181,3 +181,14 @@ void printGame(Game *game){
     }
   }
 }
+
+int checkEndGame(Game *game){
+  int wp = 0;
+  for(int i = 0;i<4;i++){
+    if(checkWin(game->p[i]) == 1){
+      wp+=1;
+    }
+  }
+  return wp;
+}
+

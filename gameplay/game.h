@@ -21,5 +21,6 @@ int ChessInBoard(Player *p);
 void getOption(char *finalresult, Game *game, int playerIndex, int dice);
 int moveNum(int pos, int dice);
 void printGame(Game *game);
+int checkEndGame(Game *game);
 
 #endif

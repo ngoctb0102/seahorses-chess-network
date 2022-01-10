@@ -19,15 +19,15 @@ Player *makePlayer(char username[], int playOrder,char printChar, int color){
   return player;
 }
 // tinh tong position
-int getTotalPos(Player *p){
+int getTotalPos(Player p){
   int sum = 0;
   for(int i = 0;i<4;i++){
-    sum += p->horse[i].position;
+    sum += p.horse[i].position;
   }
   return sum;
 }
 //kiem tra dieu kien thang
-int checkWin(Player *p){
+int checkWin(Player p){
   int sum = getTotalPos(p);
   if(sum == 210){
     return 1;
