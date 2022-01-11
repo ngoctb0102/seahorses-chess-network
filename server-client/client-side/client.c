@@ -17,7 +17,6 @@
 
 UserNode* current_user = NULL;
 int state = NOT_LOGGED_IN;
-char current_user_name[100];
 int room_updating = 0;
 Room* my_room = NULL;
 
@@ -93,7 +92,8 @@ void home(int sock){
         printf("\n2. Tham gia phong");
         printf("\n3. Tim phong choi");
         printf("\n4. Thoat");
-        printf("\nLua chon cua ban: "); scanf("%d", &choice);
+        printf("\n5. send something");
+        printf("\nLua chon cua ban: "); scanf("%d%*c", &choice);
         switch(choice){
             case 1: 
                 requestCreateRoom(sock);
@@ -107,6 +107,7 @@ void home(int sock){
                 break;
             case 3: requestFindRoom(sock); break;
             case 4: request_logout(sock); break;
+            case 5: send(sock, "TO-tuanvu-hi i am long", SEND_RECV_LEN, 0); break;
             default: printf("\nLa sao? Nhap lai coi\n"); break;
         }
     } while(choice != 4);
@@ -116,12 +117,7 @@ void roomLobby(int sock){
     int choice;
     while(state == IN_ROOM || state == WAITING_RESPONSE){
         if(state == IN_ROOM && room_updating == 0){
-            // system("clear");
-            // printRoom(my_room);
-            // printf("\n1. Bat dau van dau");
-            // printf("\n2. Thoat");
-            // printf("\nLua chon cua ban: "); 
-            scanf("%d", &choice);
+            scanf("%d%*c", &choice);
             switch(choice){
                 case 1: break;
                 case 2: exitRoom(sock); break;
@@ -220,14 +216,33 @@ void* recv_handler(void* recv_sock){
                 my_room = createRoom(atoi(msg[2]), current_user->username);
                 state = IN_ROOM;
                 room_updating = 1;
-                printRoom(my_room);
+                printRoom(my_room, current_user->username);
                 room_updating = 0;
             }
         }
         if(strcmp(msg[0], "UPDATEROOM") == 0){
             if(strcmp(msg[1], "JOIN") == 0){
+                room_updating = 1;
+                system("clear");
                 printf("%s joined", msg[2]);
+                strcpy(my_room->players[my_room->inroom_no], msg[2]);
+                my_room->inroom_no += 1;
+                printRoom(my_room, current_user->username);
+                room_updating = 0;
             }
+        }
+        if(strcmp(msg[0], "JOINROOM") == 0){ // message
+            if(strcmp(msg[1], "SUCCESS") == 0){ // message
+                printf("\n>> From server: Tham gia phong thanh cong\n");
+                my_room = createJoinRoom(msg);
+                state = INROOM;
+                room_updating = 1;
+                printRoom(my_room, current_user->username);
+                room_updating = 0;
+            }
+            else if(strcmp(msg[1], "FULL") == 0) // message
+                printf("\n >> From server: So nguoi choi trong phong da dat toi da.\n");
+            else printf("\n >> From server: Tham gia phong khong thanh cong\n");
         }
     }
 

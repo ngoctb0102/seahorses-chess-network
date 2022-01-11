@@ -95,12 +95,12 @@ void startGame(Room** root, int room_id){
 void printRooms(Room** rooms){
     for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
         if(rooms[i] != NULL){
-            printRoom(rooms[i]);
+            printRoom(rooms[i], NULL);
         }
     }
 }
 
-void printRoom(Room* room){
+void printRoom(Room* room, char* current_user_name){
     printf("\n------------------Phong choi %d ------------------\n", room->room_id);
     printf("- Trang thai: ");
     switch(room->status){
@@ -112,6 +112,15 @@ void printRoom(Room* room){
     printf("\n\t1. %s (chu phong)", room->players[0]);
     for(int j = 1; j < room->inroom_no; j++){
         printf("\n\t%d. %s", j+1, room->players[j]);
+    }
+    if(current_user_name != NULL){
+        if(strcmp(current_user_name, room->players[0]) == 0){
+            printf("\n1. Bat dau van dau");
+            printf("\n2. Thoat phong");
+        } else {
+            printf("\n1. Thoat phong");
+        }
+        printf("\nLua chon cua ban: ");
     }
 }
 

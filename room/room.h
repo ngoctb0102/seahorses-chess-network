@@ -40,7 +40,7 @@ void startGame(Room** rooms, int room_id);
 
 void printRooms(Room** rooms);
 
-void printRoom(Room* room);
+void printRoom(Room* room, char* current_user_name);
 
 void freeRoom(Room* node);
 

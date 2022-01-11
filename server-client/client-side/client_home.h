@@ -16,4 +16,6 @@ void requestFindRoom();
 
 void exitRoom(int sock);
 
+Room* createJoinRoom(char** msg);
+
 #endif

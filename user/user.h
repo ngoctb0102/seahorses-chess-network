@@ -6,6 +6,7 @@
 typedef enum {
     OFFLINE,
     ONLINE,
+    INROOM,
     INGAME
 } UserStatus;
 
