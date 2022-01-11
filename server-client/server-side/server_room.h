@@ -12,10 +12,10 @@ extern Room* rooms[MAX_ROOM_ALLOWED];
 
 // Functions
 
-void userCreateRoom(char** msg, UserNode* current_user);
+void userCreateRoom(char** msg, UserNode** current_user);
 
-void userExitRoom(char** msg, UserNode* current_user);
+void userExitRoom(char** msg, UserNode** current_user);
 
-void userJoinRoom(char** msg, UserNode* current_user);
+void userJoinRoom(char** msg, UserNode** current_user);
 
 #endif

@@ -174,15 +174,15 @@ void *connection_handler(void *client_sockets){
 			continue;
 		}
 		if(strcmp(melted_msg[0], "newroom") == 0){ // message prefix
-			userCreateRoom(melted_msg, current_user);
+			userCreateRoom(melted_msg, &current_user);
 			continue;
 		}
 		if(strcmp(melted_msg[0], "exitroom") == 0){ // message prefix
-			userExitRoom(melted_msg, current_user);
+			userExitRoom(melted_msg, &current_user);
 			continue;
 		}
 		if(strcmp(melted_msg[0], "JOINROOM") == 0){
-			userJoinRoom(melted_msg, current_user);
+			userJoinRoom(melted_msg, &current_user);
 			continue;
 		}
 		if(strcmp(melted_msg[0], "TO") == 0){ // experiment
