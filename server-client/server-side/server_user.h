@@ -9,10 +9,10 @@ extern int total_user;
 
 //------------Functions---------------
 
-void login(char** msg, int socket);
+UserNode* login(char** msg, int client_send_sock, int client_recv_sock);
 
-void logout(char** msg, int sock);
+void logout(char** msg, UserNode** current_user);
 
-void signup(char** msg, int sock);
+void signup(char** msg, UserNode** current_user, int client_send_sock, int client_recv_sock);
 
 #endif

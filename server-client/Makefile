@@ -8,8 +8,8 @@ server.o: server-side/server.c
 	gcc -c -Wall server-side/server.c
 
 # ----------------------Client----------------------
-client: client.o util.o room.o client_user.o client_home.o
-	gcc client.o util.o room.o client_user.o client_home.o -o client
+client: client.o util.o user.o room.o client_user.o client_home.o
+	gcc client.o util.o user.o room.o client_user.o client_home.o -pthread -o client
 
 client.o: client-side/client.c
 	gcc -c -Wall client-side/client.c

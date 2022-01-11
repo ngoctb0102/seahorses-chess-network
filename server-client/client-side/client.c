@@ -4,15 +4,21 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <pthread.h>
 #include "../util.h"
 #include "../../room/room.h"
 #include "client_user.h"
 #include "client_home.h"
 #include "../message.h"
+#include "../../user/user.h"
+#include "client.h"
 
 //-------------Globals-----------------
 
+UserNode* current_user = NULL;
+int state = NOT_LOGGED_IN;
 char current_user_name[100];
+int room_updating = 0;
 Room* my_room = NULL;
 
 //----------User Interfaces------------
@@ -20,60 +26,57 @@ Room* my_room = NULL;
 void home(int sock);
 void roomLobby(int sock);
 
+//------------ Handlers --------------
+
+void* recv_handler(void* recv_sock);
+void* send_handler(void* send_sock);
+
 //------------------------------------
 
 int main(int argc, const char * argv[]) {
-    //create a socket
-    int network_socket;
-    network_socket=socket(AF_INET,SOCK_STREAM,0);
+    // create sockets
+    int client_send_sock;
+    client_send_sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    int client_recv_sock;
+    client_recv_sock = socket(AF_INET, SOCK_STREAM, 0);
     
-    //specify an address for the socket
+    // specify an address for the socket
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(9999);
     server_address.sin_addr.s_addr=INADDR_ANY;
-    
-    int connection_status = connect(network_socket, (struct sockaddr *) & server_address, sizeof(server_address));
-    //check for connection_status
-    if(connection_status==-1)
-    {
-        printf("The connection has error\n\n");
+
+    if(connect(client_send_sock, (struct sockaddr *) &server_address, sizeof(server_address)) == -1){
+        puts("Unable to connect send-stream to server. Exit");
+        exit(-1);
     }
-    
-    if(connection_status==0)
-    {
-        char response[256];
-        //receive data from the server
-        recv(network_socket, response, SEND_RECV_LEN, 0);
-        printf(">> %s\n", response);
-        int choice;
-        do{
-            system("clear");
-            printf("\n-------------GAME CA NGUA SIEU CAP VJPRO-------------");
-            printf("\n1. Dang nhap");
-            printf("\n2. Dang ki");
-            printf("\n3. Thoat");
-            printf("\nLua chon cua ban: "); scanf("%d", &choice);
-            switch(choice){
-                case 1: 
-                    if(login(network_socket)){
-                        home(network_socket);
-                    } break;
-                case 2:
-                    if(signup(network_socket)){
-                        home(network_socket);
-                    }
-                    break;
-                case 3: 
-                    send(network_socket, "exit", SEND_RECV_LEN, 0);
-                    printf("\nHen gap lai!!\n"); 
-                    break;
-                default: printf("\nKhong hieu? Chon lai di.\n"); break;
-            }
-        } while(choice != 3);
-	}
-    //close the socket
-    close(network_socket);
+
+    if(connect(client_recv_sock, (struct sockaddr *) &server_address, sizeof(server_address)) == -1){
+        puts("Unable to connect recv-stream to server. Exit");
+        exit(-1);
+    }
+
+    // Threading
+    pthread_t threads[2];
+
+    if(pthread_create(&threads[0], NULL, send_handler, &client_send_sock) < 0){
+        puts("Unable to open send thread. Exit.");
+        exit(-1);
+    }
+
+    if(pthread_create(&threads[1], NULL, recv_handler, &client_recv_sock) < 0){
+        puts("Unable to open recv thread. Exit");
+        exit(-1);
+    }
+
+    // join threads
+    pthread_join(threads[0], NULL);
+    pthread_join(threads[1], NULL);
+
+    // close sockets
+    close(client_send_sock);
+    close(client_recv_sock);
     
     return 0;
 }
@@ -85,7 +88,7 @@ void home(int sock){
     do {
         system("clear");
         printf("\n-----------Sanh cho-----------");
-        printf("\nXin chao %s", current_user_name);
+        printf("\nXin chao %s", current_user->username);
         printf("\n1. Tao phong");
         printf("\n2. Tham gia phong");
         printf("\n3. Tim phong choi");
@@ -94,16 +97,16 @@ void home(int sock){
         switch(choice){
             case 1: 
                 requestCreateRoom(sock);
-                if(my_room != NULL)
-                    roomLobby(sock);
+                // if(my_room != NULL)
+                roomLobby(sock);
                 break;
             case 2: 
                 requestJoinRoom(sock); 
-                if(my_room != NULL)
-                    roomLobby(sock);
+                // if(my_room != NULL)
+                roomLobby(sock);
                 break;
             case 3: requestFindRoom(sock); break;
-            case 4: logout(sock); break;
+            case 4: request_logout(sock); break;
             default: printf("\nLa sao? Nhap lai coi\n"); break;
         }
     } while(choice != 4);
@@ -111,16 +114,128 @@ void home(int sock){
 
 void roomLobby(int sock){
     int choice;
-    do{
-        system("clear");
-        printRoom(my_room);
-        printf("\n1. Bat dau van dau");
-        printf("\n2. Thoat");
-        printf("\nLua chon cua ban: "); scanf("%d", &choice);
-        switch(choice){
-            case 1: break;
-            case 2: exitRoom(sock); break;
-            default: printf("\nKhong ro cau lenh.\n"); break;
+    while(state == IN_ROOM || state == WAITING_RESPONSE){
+        if(state == IN_ROOM && room_updating == 0){
+            // system("clear");
+            // printRoom(my_room);
+            // printf("\n1. Bat dau van dau");
+            // printf("\n2. Thoat");
+            // printf("\nLua chon cua ban: "); 
+            scanf("%d", &choice);
+            switch(choice){
+                case 1: break;
+                case 2: exitRoom(sock); break;
+                default: printf("\nKhong ro cau lenh.\n"); break;
+            }
+            if(choice == 2) break;
         }
-    } while(choice != 2);
+    }
+}
+
+//------------------------------------------------------------
+
+void* send_handler(void* send_sock){
+    int send_socket = *(int*) send_sock;
+    int choice;
+    while(state == WAITING_RESPONSE || state == NOT_LOGGED_IN) {
+        //system("clear");
+        if(state == NOT_LOGGED_IN){
+            printf("\n-------------GAME CA NGUA SIEU CAP VJPRO-------------");
+            printf("\n1. Dang nhap");
+            printf("\n2. Dang ki");
+            printf("\n3. Thoat");
+            printf("\nLua chon cua ban: "); scanf("%d", &choice);
+            switch(choice){
+                case 1:
+                    if(request_login(send_socket)){
+                        home(send_socket);
+                    }
+                    break;
+                case 2:
+                    if(request_signup(send_socket)){
+                        home(send_socket);
+                    }
+                    break;
+                case 3: 
+                    send(send_socket, "exit", SEND_RECV_LEN, 0);
+                    printf("\nHen gap lai!!\n"); 
+                    break;
+                default: printf("\nKhong hieu? Chon lai di.\n"); break;
+            }
+            if(choice == 3) break;
+        }
+    }
+
+    return 0;
+}
+
+void* recv_handler(void* recv_sock){
+    int recv_socket = *(int*) recv_sock;
+    int recv_bytes;
+    char buff[LEN];
+    char* msg[10];
+    while((recv_bytes = recv(recv_socket, buff, SEND_RECV_LEN, 0) > 0)){
+        meltMsg(buff, msg);
+        if(strcmp(msg[0], "LOGIN") == 0){
+            if(strcmp(msg[1], "SUCCESS") == 0){
+                puts("\nlogin sucess");
+                current_user = createUserNode(msg[2], msg[3]);
+                state = LOGGED_IN;
+                continue;
+            }
+            if(strcmp(msg[1], "FAILED") == 0){
+                puts("\nlogin failed.");
+                state = NOT_LOGGED_IN;
+                continue;
+            }
+        }
+        if(strcmp(msg[0], "LOGOUT") == 0){
+            if(strcmp(msg[1], "SUCCESS") == 0){
+                puts("log out ed");
+                state = NOT_LOGGED_IN;
+                UserNode* node = current_user;
+                free(node);
+                current_user = NULL;
+                continue;
+            } else {
+                state = LOGGED_IN;
+                continue;
+            }
+        }
+        if(strcmp(msg[0], "SIGNUP") == 0){
+            if(strcmp(msg[1], "SUCCESS") == 0){
+                current_user = createUserNode(msg[2], msg[3]);
+                state = LOGGED_IN;
+                continue;
+            } else {
+                state = NOT_LOGGED_IN;
+                continue;
+            }
+        }
+        if(strcmp(msg[0], "FROM") == 0){ // experiment
+            printf("\nFrom %s: %s\n", msg[1], msg[2]);
+        }
+        if(strcmp(msg[0], "NEWROOM") == 0){
+            if(strcmp(msg[1], "SUCCESS") == 0){
+                my_room = createRoom(atoi(msg[2]), current_user->username);
+                state = IN_ROOM;
+                room_updating = 1;
+                printRoom(my_room);
+                room_updating = 0;
+            }
+        }
+        if(strcmp(msg[0], "UPDATEROOM") == 0){
+            if(strcmp(msg[1], "JOIN") == 0){
+                printf("%s joined", msg[2]);
+            }
+        }
+    }
+
+    if(recv_bytes < 0){
+        puts("\nError occurs in connection");
+    } else {
+        puts("\nConnection closed");
+    }
+
+    return 0;
 }

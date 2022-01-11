@@ -10,44 +10,64 @@
 
 UserNode* users;
 
-void login(char** msg, int socket) {
-	printf("\nrecv: <%s><%s><%s>", msg[0], msg[1], msg[2]);
+UserNode* login(char** msg, int client_send_sock, int client_recv_sock) {
+	char buff[100];
 	UserNode* node = searchUser(users, msg[1]);
 	if(node == NULL){
-		send(socket, "Tai khoan khong ton tai", 100, 0); // message
+		send(client_recv_sock, "LOGIN-FAILED-NONEXIST", SEND_RECV_LEN, 0); // message
 	}
 	else {
-		if(updateUserStatus(users, msg[1], ONLINE))
-			send(socket, "Dang nhap thanh cong", SEND_RECV_LEN, 0); // message
+		if(node->status != OFFLINE)
+			send(client_recv_sock, "LOGIN-FAILED-ACTIVE", SEND_RECV_LEN, 0); // message
 		else{
-			send(socket, "Tai khoan dang hoat dong.", SEND_RECV_LEN, 0); // message
+			node->status = ONLINE;
+			node->recv_sock = client_recv_sock;
+			node->send_sock = client_send_sock;
+			printf("\nUser logged in: %s\n", node->username);
+			sprintf(buff, "LOGIN-SUCCESS-%s-%s", msg[1], msg[2]);
+			send(client_recv_sock, buff, SEND_RECV_LEN, 0); // message
+			return node;
 		}
 	}
 }
 
-void logout(char** msg, int sock){
-	if(updateUserStatus(users, msg[1], OFFLINE))
-		send(sock, "Dang xuat thanh cong", SEND_RECV_LEN, 0); // message
+void logout(char** msg, UserNode** current_user){
+	if(updateUserStatus(users, msg[1], OFFLINE)){
+		send((*current_user)->recv_sock, "LOGOUT-SUCCESS", SEND_RECV_LEN, 0); // message
+		*current_user = NULL;
+	}
 }
 
-void signup(char** msg, int sock){
+void signup(char** msg, UserNode** current_user, int client_send_sock, int client_recv_sock){
 	// add to users tree
 	UserNode* node = searchUser(users, msg[1]);
 	if(node != NULL){
-		send(sock, "SIGNUP-EXISTS", SEND_RECV_LEN, 0);
+		send((*current_user)->recv_sock, "SIGNUP-EXISTS", SEND_RECV_LEN, 0);
 		return;
 	}
 	users = addUser(users, msg[1], msg[2]);
 	updateUserStatus(users, msg[1], ONLINE);
-	// write to users file
+
+	// make to current_user
+	*current_user = searchUser(users, msg[1]);
+	(*current_user)->recv_sock = client_recv_sock;
+	(*current_user)->send_sock = client_send_sock;
+
+	// write new account to users file
 	FILE* fp = fopen("accounts.txt", "r+");
 	if(fp == NULL){
 		printf("Can't open users records");
-		exit(1);
+		send((*current_user)->recv_sock, "SIGNUP-FAIL", SEND_RECV_LEN, 0);
+		return;
 	}
 	fprintf(fp, "%d", total_user+1);
 	fseek(fp, 0, SEEK_END);
 	fprintf(fp, "%s %s\n", msg[1], msg[2]);
 	fclose(fp);
-	send(sock, "SIGNUP-SUCCESS", SEND_RECV_LEN, 0);
+	
+	printf("\nUser signed up: %s\n", (*current_user)->username);
+	// send sign up ACK
+	char buff[LEN];
+	sprintf(buff, "SIGNUP-SUCCESS-%s-%s", (*current_user)->username, (*current_user)->password);
+	send((*current_user)->recv_sock, buff, SEND_RECV_LEN, 0);
 }

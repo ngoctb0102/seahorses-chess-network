@@ -14,6 +14,9 @@ typedef struct UserNode {
     char username[LEN];
     char password[LEN];
     UserStatus status;
+    int room_id;
+    int send_sock;
+    int recv_sock;
     struct UserNode *left, *right;
 } UserNode;
 
