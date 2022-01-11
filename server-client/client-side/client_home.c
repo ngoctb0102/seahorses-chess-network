@@ -7,6 +7,7 @@
 #include "../message.h"
 #include "client_user.h"
 #include "client_home.h"
+#include "client.h"
 #include "../../room/room.h"
 #include "../util.h"
 
@@ -36,19 +37,20 @@ void requestCreateRoom(int sock){
     char* melted_msg[10];
     strcpy(buff, "newroom");            // message
     strcat(buff, "-");                  //
-    strcat(buff, current_user_name);    //
+    strcat(buff, current_user->username);    //
     send(sock, buff, SEND_RECV_LEN, 0);
-    recv(sock, res, SEND_RECV_LEN, 0);
-    meltMsg(res, melted_msg);
-    if(strcmp(melted_msg[0], "newroom") == 0){ // message
-        if(strcmp(melted_msg[1], "success") == 0){ // message
-            printf("\n >> From server: Tao phong thanh cong\n");
-            my_room = createRoom(atoi(melted_msg[2]), current_user_name);
-        }
-        else if(strcmp(melted_msg[1], "full") == 0) // message
-            printf("\n >> From server: So phong da dat toi da.\n");
-        else printf("\n >> From server: Tao phong khong thanh cong\n");
-    }
+    // recv(sock, res, SEND_RECV_LEN, 0);
+    state = WAITING_RESPONSE;
+    // meltMsg(res, melted_msg);
+    // if(strcmp(melted_msg[0], "newroom") == 0){ // message
+    //     if(strcmp(melted_msg[1], "success") == 0){ // message
+    //         printf("\n >> From server: Tao phong thanh cong\n");
+    //         my_room = createRoom(atoi(melted_msg[2]), current_user_name);
+    //     }
+    //     else if(strcmp(melted_msg[1], "full") == 0) // message
+    //         printf("\n >> From server: So phong da dat toi da.\n");
+    //     else printf("\n >> From server: Tao phong khong thanh cong\n");
+    // }
 }
 
 void requestJoinRoom(int sock){
@@ -57,19 +59,20 @@ void requestJoinRoom(int sock){
     char* melted_msg[10];
     int room_id;
     printf("> Nhap ma so phong ban muon tham gia: "); scanf("%d", &room_id);
-    snprintf(buff, sizeof(buff), "JOINROOM-%s-%d", current_user_name, room_id); // message
+    snprintf(buff, sizeof(buff), "JOINROOM-%s-%d", current_user->username, room_id); // message
     send(sock, buff, SEND_RECV_LEN, 0);
-    recv(sock, res, SEND_RECV_LEN, 0);
-    meltMsg(res, melted_msg);
-    if(strcmp(melted_msg[0], "JOINROOM") == 0){ // message
-        if(strcmp(melted_msg[1], "SUCCESS") == 0){ // message
-            printf("\n>> From server: Tham gia phong thanh cong\n");
-            my_room = createJoinRoom(melted_msg);
-        }
-        else if(strcmp(melted_msg[1], "FULL") == 0) // message
-            printf("\n >> From server: So nguoi choi trong phong da dat toi da.\n");
-        else printf("\n >> From server: Tham gia phong khong thanh cong\n");
-    }
+    state = WAITING_RESPONSE;
+    // recv(sock, res, SEND_RECV_LEN, 0);
+    // meltMsg(res, melted_msg);
+    // if(strcmp(melted_msg[0], "JOINROOM") == 0){ // message
+    //     if(strcmp(melted_msg[1], "SUCCESS") == 0){ // message
+    //         printf("\n>> From server: Tham gia phong thanh cong\n");
+    //         my_room = createJoinRoom(melted_msg);
+    //     }
+    //     else if(strcmp(melted_msg[1], "FULL") == 0) // message
+    //         printf("\n >> From server: So nguoi choi trong phong da dat toi da.\n");
+    //     else printf("\n >> From server: Tham gia phong khong thanh cong\n");
+    // }
 }
 
 void requestFindRoom(){
@@ -79,9 +82,10 @@ void requestFindRoom(){
 
 void exitRoom(int sock){
     char buff[100];
-    snprintf(buff, sizeof(buff), "exitroom-%s-%d", current_user_name, my_room->room_id); // message
+    snprintf(buff, sizeof(buff), "exitroom-%s-%d", current_user->username, my_room->room_id); // message
     send(sock, buff, SEND_RECV_LEN, 0);
     Room* node = my_room;
     freeRoom(node);
+    state = LOGGED_IN;
     my_room = NULL;
 }

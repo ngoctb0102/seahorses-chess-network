@@ -8,6 +8,7 @@ UserNode* createUserNode(char* username, char* passwd){
     UserNode* newnode = (UserNode*) malloc(sizeof(UserNode));
     strcpy(newnode->username, username);
     strcpy(newnode->password, passwd);
+    newnode->room_id = -1;
     newnode->status = OFFLINE;
     newnode->right = NULL;
     newnode->left = NULL;

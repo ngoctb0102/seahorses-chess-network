@@ -2,6 +2,7 @@
 #define __SERVEROOM_H__
 
 #include "../../room/room.h"
+#include "../../user/user.h"
 
 // This file define server action when there is room-related request
 
@@ -11,10 +12,10 @@ extern Room* rooms[MAX_ROOM_ALLOWED];
 
 // Functions
 
-void userCreateRoom(char** msg, int sock);
+void userCreateRoom(char** msg, UserNode* current_user);
 
-void userExitRoom(char** msg, int sock);
+void userExitRoom(char** msg, UserNode* current_user);
 
-void userJoinRoom(char** msg, int sock);
+void userJoinRoom(char** msg, UserNode* current_user);
 
 #endif
