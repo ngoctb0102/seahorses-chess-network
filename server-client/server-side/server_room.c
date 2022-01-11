@@ -22,11 +22,30 @@ void userCreateRoom(char** msg, int sock){
 }
 
 void userExitRoom(char** msg, int sock){
-	removeUserFromRoom(rooms, atoi(msg[2]), msg[1]);
-	current_no_room--;
+	if(removeUserFromRoom(rooms, atoi(msg[2]), msg[1]) == 0)
+		current_no_room--;
 }
 
 void userJoinRoom(char** msg, int sock){
     // TODO
+	char buff[100];
+	int room_id = atoi(msg[2]);
+	if(room_id < 0 || room_id >= MAX_ROOM_ALLOWED || rooms[room_id] == NULL){
+		snprintf(buff, sizeof(buff), "JOINROOM-FAIL-%d", room_id);
+		send(sock, buff, sizeof(buff), 0);
+		return;
+	}
+	switch(addUserToRoom(rooms, room_id, msg[1])){
+		case 0:
+			snprintf(buff, sizeof(buff), "JOINROOM-FAIL-%d", room_id); 
+			break;
+		case 1:
+			snprintf(buff, sizeof(buff), "JOINROOM-SUCCESS-%s", roomToString(rooms, room_id));
+			break;
+		case -1:
+			snprintf(buff, sizeof(buff), "JOINROOM-FULL-%d", room_id); 
+			break;
+	}
+	send(sock, buff, SEND_RECV_LEN, 0);
 }
 

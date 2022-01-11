@@ -58,7 +58,9 @@ int checkCanMove(char *state, Horse horse, int move_num){
   if(position < 48 && (position + move_num) > 48) return 0;
   for(int i = 1; i < move_num + 1;i++){
 	  int block_id = horse.step[position - 1] - 1;
-	  char pos = state[block_id + i];
+    if(block_id + i > 71) return 0;
+	  char pos = state[(block_id + i)%48];
+    printf("\n%d-%c\n",block_id + i,pos);
     if(position < 48){
       if(pos != '*' && i < move_num){
         return 0; 
@@ -66,14 +68,14 @@ int checkCanMove(char *state, Horse horse, int move_num){
       if(pos == horse.printChar && i == move_num){
         return 0; 
       }
-      return 1;
     }
     if(position == 48){
-      if(state[block_id + 1] != 1) return 0;
+      printf("%c",state[horse.step[position]]);
+      if(state[horse.step[position]-1] != '1') return 0;
       else{
-        for(int j = 1;j < move_num+1;j++){
-          char pos = state[block_id+j];
-          if(pos == horse.printChar) return 0;
+        for(int j = 0;j < move_num;j++){
+          char poss = state[horse.step[position]-1 +j];
+          if(poss == horse.printChar) return 0;
         }
         return 1;
       }
@@ -82,11 +84,12 @@ int checkCanMove(char *state, Horse horse, int move_num){
       if(position == 54) return 0;
       if(move_num > 1) return 0;
       else{
-        if(state[horse.step[position] - 1] == horse.printChar) return 0;
+        if(state[horse.step[position]-1] == horse.printChar) return 0;
         return 1;
       }
     } 
   }
+  return 1;
 }
 //get player index when meet in state
 int playerChar(char c){
@@ -137,6 +140,9 @@ int moveNum(int pos, int dice){
     if(dice == pos-48+1){
       result =  1;
     }else{
+      if(dice == 1){
+        return 2;
+      }
       result = dice;
     }
   }
@@ -181,3 +187,14 @@ void printGame(Game *game){
     }
   }
 }
+
+int checkEndGame(Game *game){
+  int wp = 0;
+  for(int i = 0;i<4;i++){
+    if(checkWin(game->p[i]) == 1){
+      wp+=1;
+    }
+  }
+  return wp;
+}
+

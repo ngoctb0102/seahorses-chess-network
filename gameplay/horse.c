@@ -1,3 +1,4 @@
+
 #include<stdio.h>
 #include<stdlib.h>
 #include "horse.h"
@@ -22,25 +23,21 @@ Horse *makeHorse(char printChar, int color, int setStep){
     for(int i = 0;i<54;i++){
       horse->step[i] = step1[i];
     }
-    // horse->step = step1;
   }
   if(setStep == 1){
     for(int i = 0;i<54;i++){
       horse->step[i] = step2[i];
     }
-    // horse->step = step2;
   }
   if(setStep == 2){
     for(int i = 0;i<54;i++){
       horse->step[i] = step3[i];
     }
-    // horse->step = step3;
   }
   if(setStep == 3){
     for(int i = 0;i<54;i++){
       horse->step[i] = step4[i];
     }
-    // horse->step = step4;
   }
   return horse;
 }

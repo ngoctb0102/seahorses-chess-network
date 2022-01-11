@@ -13,7 +13,7 @@ typedef enum {
     PLAYING
 } RoomStatus;
 
-// RoomNode in room bst
+// Room struct
 typedef struct Room{
     int room_id;
     Game* game;
@@ -22,15 +22,17 @@ typedef struct Room{
     RoomStatus status;
 } Room;
 
-// Room BST util
+// Room util
 
 int addRoom(Room** rooms, char* owner);
 
 Room* createRoom(int room_id, char* owner);
 
+Room* createBlankRoom(int room_id);
+
 int addUserToRoom(Room** rooms, int room_id, char* username);
 
-void removeUserFromRoom(Room** rooms, int room_id, char* username);
+int removeUserFromRoom(Room** rooms, int room_id, char* username);
 
 void delRoom(Room** rooms, int room_id);
 
@@ -41,5 +43,7 @@ void printRooms(Room** rooms);
 void printRoom(Room* room);
 
 void freeRoom(Room* node);
+
+char* roomToString(Room** root, int room_id);
 
 #endif

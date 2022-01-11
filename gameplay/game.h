@@ -7,9 +7,9 @@
 
 typedef struct{
   int roomID;
+  int playerNum;
   Player p[4];
   char state[72];
-  int playerNum;
 }Game;
 
 Game *makeGame(int roomID, int playerNum, char username1[],char username2[], char username3[], char username4[]);
@@ -21,5 +21,6 @@ int ChessInBoard(Player *p);
 void getOption(char *finalresult, Game *game, int playerIndex, int dice);
 int moveNum(int pos, int dice);
 void printGame(Game *game);
+int checkEndGame(Game *game);
 
 #endif
