@@ -37,6 +37,7 @@ int addRoom(Room** root, char* owner){
             return i;
         }
     }
+    return -1;
 }
 
 int addUserToRoom(Room** root, int room_id, char* username){
@@ -117,10 +118,12 @@ void printRoom(Room* room, char* current_user_name){
         if(strcmp(current_user_name, room->players[0]) == 0){
             printf("\n1. Bat dau van dau");
             printf("\n2. Thoat phong");
+            printf("\nLua chon cua ban: ");
         } else {
             printf("\n1. Thoat phong");
+            printf("\nLua chon cua ban: ");
         }
-        printf("\nLua chon cua ban: ");
+        // printf("\nLua chon cua ban: ");
     }
 }
 
