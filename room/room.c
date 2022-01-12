@@ -22,6 +22,7 @@ Room* createRoom(int room_id, char* owner){
 
 Room* createBlankRoom(int room_id){
     Room* newroom = (Room*) malloc(sizeof(Room));
+    newroom->room_id = room_id;
     newroom->game = NULL;
     newroom->inroom_no = 0;
     for(int i = 0; i < MAX_PLAYER_PER_ROOM; i++){
@@ -87,11 +88,11 @@ void delRoom(Room** root, int room_id){
     root[room_id] = NULL;
 }
 
-void startGame(Room** root, int room_id){
-    // TODO
-    if(root[room_id] == NULL) return;
-    root[room_id]->status = PLAYING;
-}
+// void startGame(Room** root, int room_id){
+//     // TODO
+//     if(root[room_id] == NULL) return;
+//     root[room_id]->status = PLAYING;
+// }
 
 void printRooms(Room** rooms){
     for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
