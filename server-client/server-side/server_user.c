@@ -11,7 +11,7 @@
 UserNode* users;
 
 UserNode* login(char** msg, int client_send_sock, int client_recv_sock) {
-	char buff[100];
+	char buff[BUFFSIZE];
 	UserNode* node = searchUser(users, msg[1]);
 	if(node == NULL){
 		send(client_recv_sock, "LOGIN-FAILED-NONEXIST", SEND_RECV_LEN, 0); // message

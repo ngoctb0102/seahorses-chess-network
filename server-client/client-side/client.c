@@ -222,11 +222,11 @@ void* recv_handler(void* recv_sock){
         }
         if(strcmp(msg[0], "UPDATEROOM") == 0){
             if(strcmp(msg[1], "JOIN") == 0){
-                room_updating = 1;
-                system("clear");
-                printf("%s joined", msg[2]);
                 strcpy(my_room->players[my_room->inroom_no], msg[2]);
                 my_room->inroom_no += 1;
+                room_updating = 1;
+                system("clear");
+                printf("%s joined", msg[2]);                
                 printRoom(my_room, current_user->username);
                 room_updating = 0;
             }
