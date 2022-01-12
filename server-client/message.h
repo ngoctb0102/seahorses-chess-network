@@ -3,6 +3,7 @@
 
 //Defing send and receive buffer length
 #define SEND_RECV_LEN 100
+#define BUFFSIZE 100
 
 //Define the message prefix between client and server
 

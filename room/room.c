@@ -22,6 +22,7 @@ Room* createRoom(int room_id, char* owner){
 
 Room* createBlankRoom(int room_id){
     Room* newroom = (Room*) malloc(sizeof(Room));
+    newroom->room_id = room_id;
     newroom->game = NULL;
     newroom->inroom_no = 0;
     for(int i = 0; i < MAX_PLAYER_PER_ROOM; i++){
@@ -37,6 +38,7 @@ int addRoom(Room** root, char* owner){
             return i;
         }
     }
+    return -1;
 }
 
 int addUserToRoom(Room** root, int room_id, char* username){
@@ -86,11 +88,11 @@ void delRoom(Room** root, int room_id){
     root[room_id] = NULL;
 }
 
-void startGame(Room** root, int room_id){
-    // TODO
-    if(root[room_id] == NULL) return;
-    root[room_id]->status = PLAYING;
-}
+// void startGame(Room** root, int room_id){
+//     // TODO
+//     if(root[room_id] == NULL) return;
+//     root[room_id]->status = PLAYING;
+// }
 
 void printRooms(Room** rooms){
     for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
@@ -117,10 +119,12 @@ void printRoom(Room* room, char* current_user_name){
         if(strcmp(current_user_name, room->players[0]) == 0){
             printf("\n1. Bat dau van dau");
             printf("\n2. Thoat phong");
+            printf("\nLua chon cua ban: ");
         } else {
             printf("\n1. Thoat phong");
+            printf("\nLua chon cua ban: ");
         }
-        printf("\nLua chon cua ban: ");
+        // printf("\nLua chon cua ban: ");
     }
 }
 
