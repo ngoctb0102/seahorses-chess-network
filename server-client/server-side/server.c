@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <pthread.h>
 #include <string.h>
+#include <unistd.h>
 #include "../util.h"
 #include "../../user/user.h"
 #include "../../room/room.h"
@@ -102,6 +103,23 @@ int main()
 
 		puts("Handler assigned\n");
 		no_threads++;
+
+		// game loop
+		for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
+			if(rooms[i] == NULL) continue;
+			if(rooms[i]->status == PLAYING){
+				if(checkEndGame(rooms[i]->game) != rooms[i]->game->playerNum){
+					int pid = rooms[i]->game->turn%(rooms[i]->game->playerNum + 1);
+					if(checkWin(rooms[i]->game->p[pid]) == 1){
+						rooms[i]->game->turn += 1;
+						continue;
+					}
+					rooms[i]->game->turn += 1;
+					UserNode* user = searchUser(users, rooms[i]->game->p[pid].username);
+					send(user->recv_sock, ROLL, SEND_RECV_LEN, 0);
+				}
+			}
+		}
 	}
 	int k=0;
     for (k=0; k < MAX_CLIENT_ALLOWED; k++){
@@ -203,12 +221,51 @@ void *connection_handler(void *client_sockets){
 		}
 		if(strcmp(msg[0], "STARTC") == 0){
 			Room* room = rooms[current_user->room_id];
-			room->game = makeGame(room->room_id, room->inroom_no, room->players[0], room->players[1], room->players[2], room->players[3]);
-			printGame(room->game);
+			if(room->inroom_no < 2){
+				send(current_user->recv_sock, "ONE", SEND_RECV_LEN, 0);
+			} else {
+				room->game = makeGame(room->room_id, room->inroom_no, room->players[0], room->players[1], room->players[2], room->players[3]);
+				for(int i = 0; i < room->inroom_no; i++){
+					UserNode* user = searchUser(users, room->players[i]);
+					send(user->recv_sock, "START", SEND_RECV_LEN, 0);
+				}
+				room->status = PLAYING;
+			}
 		}
-		else {
-			send(client_recv_sock, "UNKNOWN", SEND_RECV_LEN, 0); // message
+		if(strcmp(msg[0], DICE) == 0){
+			char buff[BUFFSIZE];
+			char buff1[BUFFSIZE];
+			strcpy(buff1, "MOVES-");
+			for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
+				if(strcmp(rooms[current_user->room_id]->game->p[i].username, current_user->username) == 0){
+					if(atoi(msg[1]) == 6){
+						rooms[current_user->room_id]->game->turn -= 1;
+					}
+					getOption(buff, rooms[current_user->room_id]->game, i, atoi(msg[1]));
+					strcat(buff1, buff);
+					send(current_user->recv_sock, buff1, SEND_RECV_LEN, 0);
+					break;
+				}
+			}
 		}
+		if(strcmp(msg[0], MOVEC) == 0){
+			for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
+				if(strcmp(rooms[current_user->room_id]->game->p[i].username, current_user->username) == 0){
+					rooms[current_user->room_id]->game = updateGame(rooms[current_user->room_id]->game, i, atoi(msg[1]), atoi(msg[2]));
+					break;
+				}
+			}
+			char buff[BUFFSIZE];
+			strcpy(buff, "UPDATE-");
+			strcat(buff, rooms[current_user->room_id]->game->state);
+			for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
+				UserNode* user = searchUser(users, rooms[current_user->room_id]->players[i]);
+				send(user->recv_sock, buff, SEND_RECV_LEN, 0);
+			}
+		}
+		// else {
+		// 	send(client_recv_sock, "UNKNOWN", SEND_RECV_LEN, 0); // message
+		// }
 	}
 
 	close(client_send_sock);

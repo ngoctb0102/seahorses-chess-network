@@ -1,15 +1,15 @@
 all: server client
 
 # ----------------------Server----------------------
-server: server.o util.o user.o room.o server_room.o server_user.o game.o
-	gcc server.o util.o user.o room.o server_room.o server_user.o game.o -pthread -o server
+server: server.o util.o user.o room.o server_room.o server_user.o game.o chessboard.o horse.o player.o
+	gcc server.o util.o user.o room.o server_room.o server_user.o game.o chessboard.o horse.o player.o -pthread -o server
 
 server.o: server-side/server.c
 	gcc -c -Wall server-side/server.c
 
 # ----------------------Client----------------------
-client: client.o util.o user.o room.o client_user.o client_home.o client_game.o
-	gcc client.o util.o user.o room.o client_user.o client_home.o client_game.o -pthread -o client
+client: client.o util.o user.o room.o client_user.o client_home.o client_game.o chessboard.o game.o horse.o player.o
+	gcc client.o util.o user.o room.o client_user.o client_home.o client_game.o chessboard.o game.o horse.o player.o -pthread -o client
 
 client.o: client-side/client.c
 	gcc -c -Wall client-side/client.c
@@ -41,6 +41,15 @@ client_home.o: client-side/client_home.c
 
 client_game.o: client-side/client_game.c
 	gcc -c -Wall client-side/client_game.c
+
+horse.o: ../gameplay/horse.c
+	gcc -c -Wall ../gameplay/horse.c
+
+player.o: ../gameplay/player.c
+	gcc -c -Wall ../gameplay/player.c
+
+chessboard.o: ../gameplay/chessboard.c
+	gcc -c -Wall ../gameplay/chessboard.c
 
 # -------------------------------------------------
 # To clean all object file
