@@ -36,7 +36,7 @@ int removeUserFromRoom(Room** rooms, int room_id, char* username);
 
 void delRoom(Room** rooms, int room_id);
 
-void startGame(Room** rooms, int room_id);
+// void startGame(Room** rooms, int room_id);
 
 void printRooms(Room** rooms);
 

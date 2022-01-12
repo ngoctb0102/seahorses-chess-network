@@ -35,22 +35,11 @@ void requestCreateRoom(int sock){
     char buff[100];
     char res[100];
     char* melted_msg[10];
-    strcpy(buff, "newroom");            // message
-    strcat(buff, "-");                  //
+    strcpy(buff, "newroom");                 // message
+    strcat(buff, "-");                       //
     strcat(buff, current_user->username);    //
     send(sock, buff, SEND_RECV_LEN, 0);
-    // recv(sock, res, SEND_RECV_LEN, 0);
     state = WAITING_RESPONSE;
-    // meltMsg(res, melted_msg);
-    // if(strcmp(melted_msg[0], "newroom") == 0){ // message
-    //     if(strcmp(melted_msg[1], "success") == 0){ // message
-    //         printf("\n >> From server: Tao phong thanh cong\n");
-    //         my_room = createRoom(atoi(melted_msg[2]), current_user_name);
-    //     }
-    //     else if(strcmp(melted_msg[1], "full") == 0) // message
-    //         printf("\n >> From server: So phong da dat toi da.\n");
-    //     else printf("\n >> From server: Tao phong khong thanh cong\n");
-    // }
 }
 
 void requestJoinRoom(int sock){
