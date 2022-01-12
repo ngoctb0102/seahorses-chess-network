@@ -10,6 +10,7 @@ typedef struct{
   int playerNum;
   Player p[4];
   char state[72];
+  int turn;
 }Game;
 
 Game *makeGame(int roomID, int playerNum, char username1[],char username2[], char username3[], char username4[]);

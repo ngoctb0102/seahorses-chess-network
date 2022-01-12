@@ -12,6 +12,7 @@ Game *makeGame(int roomID, int playerNum, char username1[],char username2[], cha
   game->playerNum = playerNum - 1;
   Player *p1 = makePlayer(username1, 0, CHARPRINT[0], 0);
   Player *p2 = makePlayer(username2, 1, CHARPRINT[1], 1);
+  game->turn = 0;
   game->p[0] = *p1;
   game->p[1] = *p2;
   if(playerNum > 2){
