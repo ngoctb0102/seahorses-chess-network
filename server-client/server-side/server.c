@@ -29,6 +29,7 @@ Room* rooms[MAX_ROOM_ALLOWED];
 
 //Remember to use -pthread when compiling this server's source code
 void *connection_handler(void *);
+void* gameloop_handler(void*);
 void resolve(char* client_message, UserNode* current_user, int client_send_sock, int client_recv_sock);
 void initGlobals();
 
@@ -68,6 +69,10 @@ int main()
     } 
     else printf("Server listening..\n");
 
+	// --------- Setup game loop ----------
+	// pthread_t gameloop;
+	// pthread_create(&gameloop, NULL, gameloop_handler, NULL);
+
 	// --------- Handling connection from clients -----------
 
 	struct sockaddr_in client_addr;
@@ -78,7 +83,7 @@ int main()
     int no_threads=0; // number of threads accepted
     pthread_t threads[MAX_CLIENT_ALLOWED];
 
-    while (no_threads < MAX_CLIENT_ALLOWED){
+	while (no_threads < MAX_CLIENT_ALLOWED){
 		printf("Listening...\n");
 		client_send_sock = accept(server_socket, (struct sockaddr *)&client_addr, &sin_size);
 		if(client_send_sock < 0){
@@ -104,27 +109,14 @@ int main()
 		puts("Handler assigned\n");
 		no_threads++;
 
-		// game loop
-		for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
-			if(rooms[i] == NULL) continue;
-			if(rooms[i]->status == PLAYING){
-				if(checkEndGame(rooms[i]->game) != rooms[i]->game->playerNum){
-					int pid = rooms[i]->game->turn%(rooms[i]->game->playerNum + 1);
-					if(checkWin(rooms[i]->game->p[pid]) == 1){
-						rooms[i]->game->turn += 1;
-						continue;
-					}
-					rooms[i]->game->turn += 1;
-					UserNode* user = searchUser(users, rooms[i]->game->p[pid].username);
-					send(user->recv_sock, ROLL, SEND_RECV_LEN, 0);
-				}
-			}
-		}
+
 	}
 	int k=0;
-    for (k=0; k < MAX_CLIENT_ALLOWED; k++){
+	for (k=0; k < MAX_CLIENT_ALLOWED; k++){
 		pthread_join(threads[k],NULL);
 	}
+
+	// pthread_join(gameloop, NULL);
 
     //int send_status;
     //send_status=send(client_socket, server_message, sizeof(server_message), 0);
@@ -230,6 +222,16 @@ void *connection_handler(void *client_sockets){
 					send(user->recv_sock, "START", SEND_RECV_LEN, 0);
 				}
 				room->status = PLAYING;
+				if(checkEndGame(room->game) != room->game->playerNum){
+					int pid = room->game->turn % (room->game->playerNum + 1);
+					if(checkWin(room->game->p[pid]) == 1){
+						room->game->turn += 1;
+					} else {
+						room->game->turn += 1;
+						UserNode* user = searchUser(users, room->game->p[pid].username);
+						send(user->recv_sock, ROLL, SEND_RECV_LEN, 0);
+					}
+				}
 			}
 		}
 		if(strcmp(msg[0], DICE) == 0){
@@ -249,6 +251,7 @@ void *connection_handler(void *client_sockets){
 			}
 		}
 		if(strcmp(msg[0], MOVEC) == 0){
+			Room* room = rooms[current_user->room_id];
 			for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
 				if(strcmp(rooms[current_user->room_id]->game->p[i].username, current_user->username) == 0){
 					rooms[current_user->room_id]->game = updateGame(rooms[current_user->room_id]->game, i, atoi(msg[1]), atoi(msg[2]));
@@ -262,6 +265,17 @@ void *connection_handler(void *client_sockets){
 				UserNode* user = searchUser(users, rooms[current_user->room_id]->players[i]);
 				send(user->recv_sock, buff, SEND_RECV_LEN, 0);
 			}
+			if(checkEndGame(room->game) != room->game->playerNum){
+				printf("%d\n", room->game->turn);
+				int pid = room->game->turn%(room->game->playerNum + 1);
+				while (checkWin(room->game->p[pid]) == 1){
+					room->game->turn += 1;
+					pid = room->game->turn%(room->game->playerNum + 1);
+				}
+				room->game->turn += 1;
+				UserNode* user = searchUser(users, room->game->p[pid].username);
+				send(user->recv_sock, ROLL, SEND_RECV_LEN, 0);
+			}
 		}
 		// else {
 		// 	send(client_recv_sock, "UNKNOWN", SEND_RECV_LEN, 0); // message
@@ -272,4 +286,24 @@ void *connection_handler(void *client_sockets){
 	close(client_recv_sock);
 
 	return 0;
+}
+
+void* gameloop_handler(void* args){
+	while(1){
+		for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
+			if(rooms[i] == NULL) continue;
+			if(rooms[i]->status == PLAYING){
+				if(checkEndGame(rooms[i]->game) != rooms[i]->game->playerNum){
+					int pid = rooms[i]->game->turn%(rooms[i]->game->playerNum + 1);
+					if(checkWin(rooms[i]->game->p[pid]) == 1){
+						rooms[i]->game->turn += 1;
+						continue;
+					}
+					rooms[i]->game->turn += 1;
+					UserNode* user = searchUser(users, rooms[i]->game->p[pid].username);
+					send(user->recv_sock, ROLL, SEND_RECV_LEN, 0);
+				}
+			}
+		}
+	}
 }
