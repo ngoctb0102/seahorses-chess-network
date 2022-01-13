@@ -225,48 +225,68 @@ void *connection_handler(void *client_sockets){
 				if(checkEndGame(room->game) != room->game->playerNum){
 					int pid = room->game->turn % (room->game->playerNum + 1);
 					if(checkWin(room->game->p[pid]) == 1){
+						// printf("in 1\n");
 						room->game->turn += 1;
 					} else {
+						// printf("in 2\n");
 						room->game->turn += 1;
 						UserNode* user = searchUser(users, room->game->p[pid].username);
 						send(user->recv_sock, ROLL, SEND_RECV_LEN, 0);
 					}
+					// printf("Turn: %d", room->game->turn);
 				}
 			}
+			continue;
 		}
 		if(strcmp(msg[0], DICE) == 0){
 			char buff[BUFFSIZE];
 			char buff1[BUFFSIZE];
 			strcpy(buff1, "MOVES-");
+			// printf("send dice success\n");
 			for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
+				// printf("search room\n");
 				if(strcmp(rooms[current_user->room_id]->game->p[i].username, current_user->username) == 0){
 					if(atoi(msg[1]) == 6){
+						printf("\nget 6\n");
 						rooms[current_user->room_id]->game->turn -= 1;
 					}
+					// printf("Get in here ?\n");
 					getOption(buff, rooms[current_user->room_id]->game, i, atoi(msg[1]));
+					// printf("%s", buff);
 					strcat(buff1, buff);
+					// printf("\nbuff send: %s", buff1);
 					send(current_user->recv_sock, buff1, SEND_RECV_LEN, 0);
 					break;
 				}
 			}
+			continue;
 		}
 		if(strcmp(msg[0], MOVEC) == 0){
 			Room* room = rooms[current_user->room_id];
-			for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
-				if(strcmp(rooms[current_user->room_id]->game->p[i].username, current_user->username) == 0){
-					rooms[current_user->room_id]->game = updateGame(rooms[current_user->room_id]->game, i, atoi(msg[1]), atoi(msg[2]));
-					break;
+			printf("get in move\n");
+			printf("msg2 %s", msg[2]);
+			if(atoi(msg[2]) != 0){
+				for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
+					printf("%s--\n",rooms[current_user->room_id]->game->p[i].username);
+					printf("%s--\n",current_user->username);
+					if(strcmp(rooms[current_user->room_id]->game->p[i].username, current_user->username) == 0){
+						rooms[current_user->room_id]->game = updateGame(rooms[current_user->room_id]->game, i, atoi(msg[1]), atoi(msg[2]));
+						break;
+					}
+				}
+				char buff[BUFFSIZE];
+				strcpy(buff, "UPDATE-");
+				strcat(buff, rooms[current_user->room_id]->game->state);
+				printf("get new state - %s",buff);
+				for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
+					UserNode* user = searchUser(users, rooms[current_user->room_id]->players[i]);
+					send(user->recv_sock, buff, SEND_RECV_LEN, 0);
 				}
 			}
-			char buff[BUFFSIZE];
-			strcpy(buff, "UPDATE-");
-			strcat(buff, rooms[current_user->room_id]->game->state);
-			for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
-				UserNode* user = searchUser(users, rooms[current_user->room_id]->players[i]);
-				send(user->recv_sock, buff, SEND_RECV_LEN, 0);
-			}
+			printf("next turn\n");
+			printf("Turn 2: %d\n", room->game->turn);
 			if(checkEndGame(room->game) != room->game->playerNum){
-				printf("%d\n", room->game->turn);
+				printf("%d--\n", room->game->turn);
 				int pid = room->game->turn%(room->game->playerNum + 1);
 				while (checkWin(room->game->p[pid]) == 1){
 					room->game->turn += 1;
@@ -276,6 +296,7 @@ void *connection_handler(void *client_sockets){
 				UserNode* user = searchUser(users, room->game->p[pid].username);
 				send(user->recv_sock, ROLL, SEND_RECV_LEN, 0);
 			}
+			continue;
 		}
 		// else {
 		// 	send(client_recv_sock, "UNKNOWN", SEND_RECV_LEN, 0); // message

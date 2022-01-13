@@ -61,7 +61,7 @@ int checkCanMove(char *state, Horse horse, int move_num){
 	  int block_id = horse.step[position - 1] - 1;
     if(block_id + i > 71) return 0;
 	  char pos = state[(block_id + i)%48];
-    printf("\n%d-%c\n",block_id + i,pos);
+    // printf("\n%d-%c\n",block_id + i,pos);
     if(position < 48){
       if(pos != '*' && i < move_num){
         return 0; 
@@ -71,7 +71,7 @@ int checkCanMove(char *state, Horse horse, int move_num){
       }
     }
     if(position == 48){
-      printf("%c",state[horse.step[position]]);
+      // printf("%c",state[horse.step[position]]);
       if(state[horse.step[position]-1] != '1') return 0;
       else{
         for(int j = 0;j < move_num;j++){
@@ -97,13 +97,13 @@ int playerChar(char c){
   if(c == 'R'){
     return 0;
   }
-  if(c == 'G'){
+  else if(c == 'G'){
     return 1;
   }
-  if(c == 'B'){
+  else if(c == 'B'){
     return 2;
   }
-  if(c == 'Y'){
+  else{
     return 3;
   }
 }
@@ -174,6 +174,11 @@ void getOption(char *finalresult, Game *game, int playerIndex, int dice){
     }
   }
   finalresult[0] = totalMove+48;
+  if(totalMove == 0){
+    finalresult[1] = '0';
+    finalresult[2] = '0';
+    finalresult[3] = '0';
+  }
   // char fi[13] = "";
   // fi[0] = totalMove + 48;
   // strcat(fi,result);
