@@ -6,7 +6,8 @@ enum {
     NOT_LOGGED_IN,
     LOGGED_IN,
     IN_ROOM,
-    IN_GAME
+    IN_GAME,
+    WAITING_ROLL
 };
 
 #endif

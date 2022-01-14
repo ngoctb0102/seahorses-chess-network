@@ -122,7 +122,7 @@ void printRoom(Room* room, char* current_user_name){
             printf("\nLua chon cua ban: ");
             printf("");
         } else {
-            printf("\n1. Thoat phong");
+            printf("\n2. Thoat phong");
             printf("\nLua chon cua ban: ");
         }
         printf("");
