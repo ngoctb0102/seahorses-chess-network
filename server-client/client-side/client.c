@@ -25,7 +25,9 @@ int room_updating = 0;
 int game_state = 0;
 int client_recv;
 int client_send;
-int roll_control = 0;
+int roll_control = 1;
+int af_roll = 1;
+int in_room = 1;
 Room* my_room = NULL;
 
 //----------User Interfaces------------
@@ -105,17 +107,19 @@ void home(int sock){
         printf("\n3. Tim phong choi");
         printf("\n4. Thoat");
         printf("\n5. send something");
-        printf("\nLua chon cua ban: "); scanf("%d", &choice);
+        printf("\nLua chon cua ban: "); scanf("%d%*c", &choice);
         switch(choice){
             case 1: 
                 requestCreateRoom(sock);
                 // if(my_room != NULL)
                 roomLobby(sock);
+                while(in_room){}
                 break;
             case 2: 
                 requestJoinRoom(sock); 
                 // if(my_room != NULL)
                 roomLobby(sock);
+                while(in_room){}
                 // game(sock);
                 break;
             case 3: requestFindRoom(sock); break;
@@ -128,24 +132,26 @@ void home(int sock){
 
 void roomLobby(int sock){
     int choice;
-    int a = 0;
     while(state == IN_ROOM || state == WAITING_RESPONSE){
         // if(state == IN_ROOM && room_updating == 0){
         if(state == IN_GAME) break;
         if(state == IN_ROOM && room_updating == 0){
-            if(state != IN_GAME && a == 0){
+            if(state != IN_GAME){
                 scanf("%d", &choice);
-                int c;
-                while((c = getchar()) != '\n' && c != EOF);
+                // int c;
+                // while((c = getchar()) != '\n' && c != EOF);
             }
             switch(choice){
                 case 1: 
                     startGame(sock);
-                    a = 1;
+                    in_room = 1;
+                    while(af_roll){
+
+                    }
                     // game(sock);
                     // gameplay();
                     break;
-                case 2: exitRoom(sock); break;
+                case 2: exitRoom(sock); break; in_room = 0;
                 default: printf("\nKhong ro cau lenh.\n"); break;
             }
             if(choice == 2 || state == IN_GAME) break;
@@ -153,7 +159,7 @@ void roomLobby(int sock){
     }
     while(state == IN_GAME){
         int choice2;
-        printf("Waiting!!\n ");
+        printf("Doi den luot!! khong bam gi nhe !!\n");
         // if(roll_control == 0){
         //     scanf("%d", &choice2);
         // }
@@ -168,6 +174,9 @@ void roomLobby(int sock){
                 printf("\nBan tung duoc %d\n", dice);
                 sprintf(buff, "DICE-%d", dice);
                 send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
+                while(roll_control){
+
+                }
                 // roll_control = 1;
                 // state = WAITING_ROLL;
                 break;
@@ -357,13 +366,15 @@ void* recv_handler(void* recv_sock){
             printChessBoard("************************************************123456123456123456123456");
             printf("\n");
             // gameplay();
+            printf("neu ban khong phai chu phong bam 1 de xac nhan vao game\n");
+            printf("neu da bam 1 lan xin hay doi den luot !!\n");
             state = IN_GAME;
             continue;
         }
         if(strcmp(msg[0], "ROLL") == 0){
             game_state = 1;
             state = IN_GAME;
-            printf("Den luot ban !!\n");
+            printf("\nDen luot ban !!\n");
             printf("Moi nhap 1\n");
             // int choice = 0;
             // char buff[BUFFSIZE];
@@ -378,6 +389,8 @@ void* recv_handler(void* recv_sock){
             //         send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
             //     }
             // } while(choice != 1);
+            af_roll = 0;
+            roll_control = 1;
             continue;
         }
         if(strcmp(msg[0], MOVES) == 0){
@@ -398,7 +411,7 @@ void* recv_handler(void* recv_sock){
                 // printf("\n----aaa");
             }else{
                 for(int i = 0; i < option;i++){
-                    printf("%d: ",i + 1);
+                    printf("%d: ",i+1);
                     if(msg[1][3*i + 2]-48 == 0){
                         printf("Xuat quan thu %d\n",i+1);
                     }else if(msg[1][3*i + 2]-48 == 1){
@@ -411,18 +424,18 @@ void* recv_handler(void* recv_sock){
                 scanf("%d", &choice);
                 int c;
                 while((c = getchar()) != '\n' && c != EOF);
-                if(choice < 0 || choice > option){
-                    choice = 0;
+                if(choice < 1 || choice > option){
+                    choice = 1;
                 }
                 char buff[BUFFSIZE];
                 strcpy(buff, "MOVEC-");
-                buff[6] = msg[1][3*choice+1];
+                buff[6] = msg[1][3*(choice-1)+1];
                 buff[7] = '-';
-                buff[8] = msg[1][3*choice+3];
+                buff[8] = msg[1][3*(choice-1)+3];
                 // printf("%s---------\n",buff);
                 send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
             }
-            // roll_control = 0;
+            roll_control = 0;
             printf("\n");
             // state = IN_GAME;
                 // for(int i = 0; i < option;i++){
@@ -455,6 +468,7 @@ void* recv_handler(void* recv_sock){
         }
         if(strcmp(msg[0], UPDATE) == 0){
             printChessBoard(msg[1]);
+            printf("\n");
             continue;
         }
     }

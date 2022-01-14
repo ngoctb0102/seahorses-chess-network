@@ -263,12 +263,12 @@ void *connection_handler(void *client_sockets){
 		}
 		if(strcmp(msg[0], MOVEC) == 0){
 			Room* room = rooms[current_user->room_id];
-			printf("get in move\n");
-			printf("msg2 %s", msg[2]);
+			// printf("get in move\n");
+			// printf("msg2 %s", msg[2]);
 			if(atoi(msg[2]) != 0){
 				for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
-					printf("%s--\n",rooms[current_user->room_id]->game->p[i].username);
-					printf("%s--\n",current_user->username);
+					// printf("%s--\n",rooms[current_user->room_id]->game->p[i].username);
+					// printf("%s--\n",current_user->username);
 					if(strcmp(rooms[current_user->room_id]->game->p[i].username, current_user->username) == 0){
 						rooms[current_user->room_id]->game = updateGame(rooms[current_user->room_id]->game, i, atoi(msg[1]), atoi(msg[2]));
 						break;
@@ -277,16 +277,16 @@ void *connection_handler(void *client_sockets){
 				char buff[BUFFSIZE];
 				strcpy(buff, "UPDATE-");
 				strcat(buff, rooms[current_user->room_id]->game->state);
-				printf("get new state - %s",buff);
+				// printf("get new state - %s",buff);
 				for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
 					UserNode* user = searchUser(users, rooms[current_user->room_id]->players[i]);
 					send(user->recv_sock, buff, SEND_RECV_LEN, 0);
 				}
 			}
-			printf("next turn\n");
-			printf("Turn 2: %d\n", room->game->turn);
+			// printf("next turn\n");
+			printf("Turn : %d\n", room->game->turn);
 			if(checkEndGame(room->game) != room->game->playerNum){
-				printf("%d--\n", room->game->turn);
+				// printf("%d--\n", room->game->turn);
 				int pid = room->game->turn%(room->game->playerNum + 1);
 				while (checkWin(room->game->p[pid]) == 1){
 					room->game->turn += 1;
