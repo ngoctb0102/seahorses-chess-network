@@ -174,6 +174,11 @@ void getOption(char *finalresult, Game *game, int playerIndex, int dice){
     }
   }
   finalresult[0] = totalMove+48;
+  if(totalMove == 0){
+    finalresult[1] = '0';
+    finalresult[2] = '0';
+    finalresult[3] = '0';
+  }
   // char fi[13] = "";
   // fi[0] = totalMove + 48;
   // strcat(fi,result);

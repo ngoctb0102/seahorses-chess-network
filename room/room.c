@@ -120,10 +120,12 @@ void printRoom(Room* room, char* current_user_name){
             printf("\n1. Bat dau van dau");
             printf("\n2. Thoat phong");
             printf("\nLua chon cua ban: ");
+            printf("");
         } else {
             printf("\n1. Thoat phong");
             printf("\nLua chon cua ban: ");
         }
+        printf("");
         // printf("\nLua chon cua ban: ");
     }
 }
