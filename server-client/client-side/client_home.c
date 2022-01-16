@@ -43,13 +43,14 @@ void requestCreateRoom(int sock){
 }
 
 void requestJoinRoom(int sock){
-    char buff[100];
-    char res[100];
-    char* melted_msg[10];
-    int room_id;
-    printf("> Nhap ma so phong ban muon tham gia: "); scanf("%d", &room_id);
-    snprintf(buff, sizeof(buff), "JOINROOM-%s-%d", current_user->username, room_id); // message
-    send(sock, buff, SEND_RECV_LEN, 0);
+    send(sock, "ROOMS", SEND_RECV_LEN, 0);
+    // char buff[100];
+    // char res[100];
+    // char* melted_msg[10];
+    // int room_id;
+    // printf("> Nhap ma so phong ban muon tham gia: "); scanf("%d", &room_id);
+    // snprintf(buff, sizeof(buff), "JOINROOM-%s-%d", current_user->username, room_id); // message
+    // send(sock, buff, SEND_RECV_LEN, 0);
     state = WAITING_RESPONSE;
     // recv(sock, res, SEND_RECV_LEN, 0);
     // meltMsg(res, melted_msg);

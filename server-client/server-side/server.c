@@ -298,6 +298,19 @@ void *connection_handler(void *client_sockets){
 			}
 			continue;
 		}
+		if(strcmp(msg[0], "ROOMS") == 0){
+			char buff[BUFFSIZE];
+			char buff1[30];
+			sprintf(buff, "ROOMS-%d", current_no_room);
+			for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
+				if(rooms[i] == NULL) continue;
+				sprintf(buff1, "-%d-%s-%d", i, rooms[i]->players[0], rooms[i]->inroom_no);
+				strcat(buff, buff1);
+			}
+			puts(buff);
+			send(current_user->recv_sock, buff, SEND_RECV_LEN, 0);
+			continue;
+		}
 		// else {
 		// 	send(client_recv_sock, "UNKNOWN", SEND_RECV_LEN, 0); // message
 		// }
