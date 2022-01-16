@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -54,8 +55,8 @@ int main(int argc, const char * argv[]) {
     // specify an address for the socket
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(9999);
-    server_address.sin_addr.s_addr=INADDR_ANY;
+    server_address.sin_port = htons(SERVER_PORT);
+    server_address.sin_addr.s_addr= INADDR_ANY;// inet_addr(SERVER_IP);
 
     if(connect(client_send_sock, (struct sockaddr *) &server_address, sizeof(server_address)) == -1){
         puts("Unable to connect send-stream to server. Exit");
@@ -376,19 +377,6 @@ void* recv_handler(void* recv_sock){
             state = IN_GAME;
             printf("\nDen luot ban !!\n");
             printf("Moi nhap 1\n");
-            // int choice = 0;
-            // char buff[BUFFSIZE];
-            // do {
-            //     printf("\nNhan '1' de tung xuc sac");
-            //     printf("\n");
-            //     scanf("%d%*c", &choice);
-            //     if(choice == 1){
-            //         int dice = rollDice();
-            //         printf("\nBan tung duoc %d\n", dice);
-            //         sprintf(buff, "DICE-%d", dice);
-            //         send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
-            //     }
-            // } while(choice != 1);
             af_roll = 0;
             roll_control = 1;
             continue;
@@ -437,38 +425,28 @@ void* recv_handler(void* recv_sock){
             }
             roll_control = 0;
             printf("\n");
-            // state = IN_GAME;
-                // for(int i = 0; i < option;i++){
-                //     printf("%d: ",i + 1);
-                //     if(msg[1][3*i + 2]-48 == 0){
-                //         printf("Xuat quan thu %d\n",i+1);
-                //     }else if(msg[1][3*i + 2]-48 == 1){
-                //         printf("Quan thu %d tien len %d\n",i+1,msg[1][3*i + 3]-48);
-                //     }else{
-                //         printf("Quan thu %d len chuong\n",i+1);
-                //     }
-                // }
-                // printf("Moi ban lua chon: "); scanf("%d%*c", &choice);
-            // } while(choice > 0 || choice > option);
-            // char buff[BUFFSIZE];
-            // printf("fa---------------fh");
-            // strcpy(buff, "MOVEC-");
-            // printf("fasjdkhfjkashdjkafh");
-            // buff[6] = msg[1][3*choice+1];
-            // buff[7] = '-';
-            // buff[8] = msg[1][3*choice+3];
-            // strcat(buff, msg[1][3*choice+1]);
-            // printf("fqwerqwerqew");
-            // strcat(buff, "-");
-            // printf("mvncmvnmcnv");
-            // strcat(buff, msg[1][3*choice+3]);
-            // printf("---sdkafldslkf");
-            // send(current_user->recv_sock, buff, SEND_RECV_LEN, 0);
             continue;
         }
         if(strcmp(msg[0], UPDATE) == 0){
             printChessBoard(msg[1]);
             printf("\n");
+            continue;
+        }
+        if(strcmp(msg[0], "ROOMS") == 0){
+            int room_id;
+            char buff[BUFFSIZE];
+            system("clear");
+            printf("\t\tDanh sach cac phong\n");
+            printf("\nID\tChu phong\tSo nguoi choi");
+            int room_no = atoi(msg[1]);
+            for(int i = 0; i < room_no; i++){
+                printf("\n%s%20s%s", msg[2+3*i], msg[3+3*i], msg[4+3*i]);
+            }
+            printf("\n");
+            printf("> Moi nhap ma so phong ban muon tham gia: ");
+            scanf("%d%*c", &room_id);
+            sprintf(buff, "JOINROOM-%s-%d", current_user->username, room_id);
+            send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
             continue;
         }
     }

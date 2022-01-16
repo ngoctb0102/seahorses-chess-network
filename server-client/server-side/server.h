@@ -8,4 +8,7 @@ typedef struct {
     int client_recv_sock;
 } ThrdHandlerArgs;
 
+#define SERVER_PORT 1606
+#define SERVER_ADDR "192.168.56.102"
+
 #endif
