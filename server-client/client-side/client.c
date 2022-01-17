@@ -158,7 +158,6 @@ void roomLobby(int sock){
     }
     while(state == IN_GAME){
         int choice2;
-        printf("Doi den luot!! khong bam gi nhe !!\n");
         scanf("%d", &choice2);
         char buff[BUFFSIZE];
         int dice;
@@ -331,7 +330,7 @@ void* recv_handler(void* recv_sock){
             // do{
             // roll_control = 1;
             if(option == 0){
-                printf("ban khong co con ngua nao di chuyen duoc\n");
+                printf("Ban khong co con ngua nao di chuyen duoc\n");
                 char buff[BUFFSIZE];
                 strcpy(buff, "MOVEC-");
                 buff[6] = msg[1][1];
@@ -342,35 +341,39 @@ void* recv_handler(void* recv_sock){
                 // printf("\n----aaa");
             }else{
                 for(int i = 0; i < option;i++){
-                    printf("%d: ",i+1);
+                    printf("\nBan co the di chuyen cac quan sau:\n%d: ",i+1);
                     if(msg[1][3*i + 2]-48 == 0){
-                        printf("Xuat quan thu %d\n",i+1);
+                        printf("Xuat quan thu %d\n",msg[1][3*i + 1]);
                     }else if(msg[1][3*i + 2]-48 == 1){
-                        printf("Quan thu %d tien len %d\n",i+1,msg[1][3*i + 3]-48);
+                        printf("Quan thu %d tien len %d\n",msg[1][3*i + 1],msg[1][3*i + 3]-48);
                     }else{
-                        printf("Quan thu %d len chuong\n",i+1);
+                        printf("Quan thu %d len chuong\n",msg[1][3*i + 1]);
                     }
                 }
-                printf("Moi ban lua chon: "); 
+                printf("Moi ban lua chon: (bam cac so khac la bo luot !!)"); 
                 scanf("%d", &choice);
                 int c;
                 while((c = getchar()) != '\n' && c != EOF);
                 if(choice < 1 || choice > option){
-                    choice = 1;
+                    char buff[BUFFSIZE] = "MOVEC-0-0";
+                    send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
+                }else{
+                    char buff[BUFFSIZE];
+                    strcpy(buff, "MOVEC-");
+                    buff[6] = msg[1][3*(choice-1)+1];
+                    buff[7] = '-';
+                    buff[8] = msg[1][3*(choice-1)+3];
+                    // printf("%s---------\n",buff);
+                    send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
                 }
-                char buff[BUFFSIZE];
-                strcpy(buff, "MOVEC-");
-                buff[6] = msg[1][3*(choice-1)+1];
-                buff[7] = '-';
-                buff[8] = msg[1][3*(choice-1)+3];
-                // printf("%s---------\n",buff);
-                send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
             }
             roll_control = 0;
+            printf("Doi den luot!! khong bam gi nhe !!\n");
             printf("\n");
             continue;
         }
         if(strcmp(msg[0], UPDATE) == 0){
+            system("clear");
             printChessBoard(msg[1]);
             printf("\n");
             continue;
@@ -378,6 +381,14 @@ void* recv_handler(void* recv_sock){
         if(strcmp(msg[0], WIN) == 0){
             printf("Nguoi choi %s da chien thang !!",my_room->players[atoi(msg[1])]);
             printf("\n");
+            continue;
+        }
+        if(strcmp(msg[0], ENDGAME) == 0){
+            printf("Tro choi ket thuc !!");
+            printf("\n");
+            roll_control = 0;
+            af_roll = 0;
+            state = IN_ROOM;
             continue;
         }
         if(strcmp(msg[0], "ROOMS") == 0){
