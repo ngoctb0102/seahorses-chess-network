@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
@@ -36,8 +37,13 @@ void initGlobals();
 
 //-------------------------- Main --------------------------
 
-int main()
+int main(int argc, const char* args[])
 {
+	if(argc != 2){
+		printf("\nKhong ro dinh dang. Moi nhap: ./server <server_address>");
+		exit(1);
+	}
+
 	// init globals
 	initGlobals();
 
@@ -55,7 +61,7 @@ int main()
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(9999);
-    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_addr.s_addr = inet_addr(args[1]);
     
     if (bind(server_socket, (struct sockaddr*) &server_addr, sizeof(server_addr))!=0){
 		printf("socket bind failed...\n"); 
@@ -68,10 +74,6 @@ int main()
         exit(0); 
     } 
     else printf("Server listening..\n");
-
-	// --------- Setup game loop ----------
-	// pthread_t gameloop;
-	// pthread_create(&gameloop, NULL, gameloop_handler, NULL);
 
 	// --------- Handling connection from clients -----------
 
@@ -116,10 +118,6 @@ int main()
 		pthread_join(threads[k],NULL);
 	}
 
-	// pthread_join(gameloop, NULL);
-
-    //int send_status;
-    //send_status=send(client_socket, server_message, sizeof(server_message), 0);
     close(server_socket);
     
     return 0;
@@ -134,7 +132,7 @@ void initGlobals(){
 	for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
 		rooms[i] = NULL;
 	}
-	FILE* fp = fopen("accounts.txt", "r");
+	FILE* fp = fopen("server-client/accounts.txt", "r");
 	if(fp == NULL){
 		printf("\n[ERROR] Unable to open accounts db");
 		exit(1);
