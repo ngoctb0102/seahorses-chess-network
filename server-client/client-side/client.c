@@ -375,6 +375,11 @@ void* recv_handler(void* recv_sock){
             printf("\n");
             continue;
         }
+        if(strcmp(msg[0], WIN) == 0){
+            printf("Nguoi choi %s da chien thang !!",my_room->players[atoi(msg[1])]);
+            printf("\n");
+            continue;
+        }
         if(strcmp(msg[0], "ROOMS") == 0){
             int room_id;
             char buff[BUFFSIZE];

@@ -269,6 +269,15 @@ void *connection_handler(void *client_sockets){
 					// printf("%s--\n",current_user->username);
 					if(strcmp(rooms[current_user->room_id]->game->p[i].username, current_user->username) == 0){
 						rooms[current_user->room_id]->game = updateGame(rooms[current_user->room_id]->game, i, atoi(msg[1]), atoi(msg[2]));
+						if(checkWin(rooms[current_user->room_id]->game->p[i]) == 1){
+							char buffw[BUFFSIZE];
+							// strcpy(buffw,"WIN-");
+							sprintf(buffw, "WIN-%d", i);
+							for(int i = 0; i < rooms[current_user->room_id]->inroom_no; i++){
+								UserNode* user = searchUser(users, rooms[current_user->room_id]->players[i]);
+								send(user->recv_sock, buffw, SEND_RECV_LEN, 0);
+							}
+						}
 						break;
 					}
 				}
