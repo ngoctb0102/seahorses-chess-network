@@ -15,20 +15,23 @@ UserNode* login(char** msg, int client_send_sock, int client_recv_sock) {
 	UserNode* node = searchUser(users, msg[1]);
 	if(node == NULL){
 		send(client_recv_sock, "LOGIN-FAILED-NONEXIST", SEND_RECV_LEN, 0); // message
+		return NULL;
 	}
-	else {
-		if(node->status != OFFLINE)
-			send(client_recv_sock, "LOGIN-FAILED-ACTIVE", SEND_RECV_LEN, 0); // message
-		else{
-			node->status = ONLINE;
-			node->recv_sock = client_recv_sock;
-			node->send_sock = client_send_sock;
-			printf("\nUser logged in: %s\n", node->username);
-			sprintf(buff, "LOGIN-SUCCESS-%s-%s", msg[1], msg[2]);
-			send(client_recv_sock, buff, SEND_RECV_LEN, 0); // message
-			return node;
-		}
+	if(node->status != OFFLINE){
+		send(client_recv_sock, "LOGIN-FAILED-ACTIVE", SEND_RECV_LEN, 0); // message
+		return NULL;
 	}
+	if(strcmp(node->password, msg[2]) != 0){
+		send(client_recv_sock, "LOGIN-FAILED-WRONGPASS", SEND_RECV_LEN, 0);
+		return NULL;
+	}
+	node->status = ONLINE;
+	node->recv_sock = client_recv_sock;
+	node->send_sock = client_send_sock;
+	printf("\nUser logged in: %s\n", node->username);
+	sprintf(buff, "LOGIN-SUCCESS-%s-%s", msg[1], msg[2]);
+	send(client_recv_sock, buff, SEND_RECV_LEN, 0); // message
+	return node;
 }
 
 void logout(char** msg, UserNode** current_user){
