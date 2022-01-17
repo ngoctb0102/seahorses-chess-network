@@ -45,6 +45,10 @@ void* send_handler(void* send_sock);
 //------------------------------------
 
 int main(int argc, const char * argv[]) {
+    if(argc != 2){
+        printf("\nKhong ro dinh dang. Yeu cau nhap: ./client <address>\n");
+        exit(1);
+    }
     // create sockets
     int client_send_sock;
     client_send_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -56,7 +60,7 @@ int main(int argc, const char * argv[]) {
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(SERVER_PORT);
-    server_address.sin_addr.s_addr= INADDR_ANY;// inet_addr(SERVER_IP);
+    server_address.sin_addr.s_addr= inet_addr(argv[1]);
 
     if(connect(client_send_sock, (struct sockaddr *) &server_address, sizeof(server_address)) == -1){
         puts("Unable to connect send-stream to server. Exit");
@@ -139,20 +143,14 @@ void roomLobby(int sock){
         if(state == IN_ROOM && room_updating == 0){
             if(state != IN_GAME){
                 scanf("%d", &choice);
-                // int c;
-                // while((c = getchar()) != '\n' && c != EOF);
             }
             switch(choice){
                 case 1: 
                     startGame(sock);
                     in_room = 1;
-                    while(af_roll){
-
-                    }
-                    // game(sock);
-                    // gameplay();
+                    while(af_roll){}
                     break;
-                case 2: exitRoom(sock); break; in_room = 0;
+                case 2: exitRoom(sock); in_room = 0; break; 
                 default: printf("\nKhong ro cau lenh.\n"); break;
             }
             if(choice == 2 || state == IN_GAME) break;
@@ -161,11 +159,6 @@ void roomLobby(int sock){
     while(state == IN_GAME){
         int choice2;
         printf("Doi den luot!! khong bam gi nhe !!\n");
-        // if(roll_control == 0){
-        //     scanf("%d", &choice2);
-        // }
-        // int c;
-        // while((c = getchar()) != '\n' && c != EOF);
         scanf("%d", &choice2);
         char buff[BUFFSIZE];
         int dice;
@@ -175,62 +168,12 @@ void roomLobby(int sock){
                 printf("\nBan tung duoc %d\n", dice);
                 sprintf(buff, "DICE-%d", dice);
                 send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
-                while(roll_control){
-
-                }
-                // roll_control = 1;
-                // state = WAITING_ROLL;
+                while(roll_control){}
                 break;
             default: printf("\n ban nhap sai\n"); break;
         }
     }
 }
-
-// void game(int sock){
-//     char buff[BUFFSIZE];
-//     int dice;
-//     int choice = -1;
-//     while(game_state != -1){
-//         if(game_state == 1){
-//             do {
-//                 scanf("%d%*c", &choice);
-//                 if(choice == 1){
-//                     dice = rollDice();
-//                     printf("\nBan tung duoc %d\n", dice);
-//                     sprintf(buff, "DICE-%d", dice);
-//                     game_state = 0;
-//                     send(sock, buff, SEND_RECV_LEN, 0);
-//                     printf("choice: %d gamestate: %d", choice, game_state);
-//                 }
-//             } while(choice != 1);
-//             continue;
-//         }
-//         if(game_state == 2){
-//             continue;
-//         }
-//         if(game_state == 3){
-//             continue;
-//         }
-//     }
-// }
-
-// void gameplay(){
-//     int choice = -1;
-//     char buff[BUFFSIZE];
-//     int dice;
-//     do{
-//         printf("\nDoi den luot"); 
-//         scanf("%d%*c", &choice);
-//         if(choice == 1){
-//             dice = rollDice();
-//             printf("\nBan tung duoc %d\n", dice);
-//             sprintf(buff, "DICE-%d", dice);
-//             game_state = 0;
-//             send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
-//             printf("choice: %d gamestate: %d", choice, game_state);
-//         }
-//     } while(choice != 100);
-// }
 
 //------------------------------------------------------------
 
