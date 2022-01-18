@@ -65,11 +65,6 @@ void requestJoinRoom(int sock){
     // }
 }
 
-void requestFindRoom(){
-    char buff[100];
-    snprintf(buff, sizeof(buff), "FINDROOM");
-}
-
 void exitRoom(int sock){
     char buff[100];
     snprintf(buff, sizeof(buff), "exitroom-%s-%d", current_user->username, my_room->room_id); // message

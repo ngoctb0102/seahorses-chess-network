@@ -10,10 +10,10 @@ extern int state;
 
 //--------------Functions-------------------
 
-int request_login(int sock);
+int requestLogin(int sock);
 
-void request_logout(int sock);
+void requestLogout(int sock);
 
-int request_signup(int sock);
+int requestSignup(int sock);
 
 #endif

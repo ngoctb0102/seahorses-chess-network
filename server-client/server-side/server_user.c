@@ -57,7 +57,7 @@ void signup(char** msg, UserNode** current_user, int client_send_sock, int clien
 	(*current_user)->send_sock = client_send_sock;
 
 	// write new account to users file
-	FILE* fp = fopen("accounts.txt", "r+");
+	FILE* fp = fopen(ACCOUNTS_PATH, "r+");
 	if(fp == NULL){
 		printf("Can't open users records");
 		send((*current_user)->recv_sock, "SIGNUP-FAIL", SEND_RECV_LEN, 0);

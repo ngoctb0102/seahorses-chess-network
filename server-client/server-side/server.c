@@ -132,7 +132,7 @@ void initGlobals(){
 	for(int i = 0; i < MAX_ROOM_ALLOWED; i++){
 		rooms[i] = NULL;
 	}
-	FILE* fp = fopen("server-client/accounts.txt", "r");
+	FILE* fp = fopen(ACCOUNTS_PATH, "r");
 	if(fp == NULL){
 		printf("\n[ERROR] Unable to open accounts db");
 		exit(1);

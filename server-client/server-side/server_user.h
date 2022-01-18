@@ -3,6 +3,8 @@
 
 #include "../../user/user.h"
 
+#define ACCOUNTS_PATH "server-client/accounts.txt"
+
 //-------------Globals----------------
 extern UserNode* users;
 extern int total_user;
