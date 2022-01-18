@@ -118,11 +118,11 @@ void printRoom(Room* room, char* current_user_name){
     if(current_user_name != NULL){
         if(strcmp(current_user_name, room->players[0]) == 0){
             printf("\n1. Bat dau van dau");
-            printf("\n2. Thoat phong");
-            printf("\nLua chon cua ban: ");
+            printf("\n2. Thoat phong\nLua chon cua ban: ");
+            //printf("\nLua chon cua ban: ");
         } else {
-            printf("\n2. Thoat phong");
-            printf("\nLua chon cua ban: ");
+            printf("\n2. Thoat phong\nLua chon cua ban: ");
+            //printf("\nLua chon cua ban: ");
         }
         printf("");
         // printf("\nLua chon cua ban: ");

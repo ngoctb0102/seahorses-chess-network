@@ -135,18 +135,20 @@ void roomLobby(int sock){
         if(state == IN_GAME) break;
         if(state == IN_ROOM && room_updating == 0){
             if(state != IN_GAME){
-                scanf("%d", &choice);
+                scanf("%d%*c", &choice);
             }
-            switch(choice){
-                case 1: 
-                    startGame(sock);
-                    in_room = 1;
-                    while(af_roll){}
-                    break;
-                case 2: exitRoom(sock); in_room = 0; break; 
-                default: printf("\nKhong ro cau lenh.\n"); break;
+            if(in_room == 1){
+                switch(choice){
+                    case 1: 
+                        startGame(sock);
+                        in_room = 1;
+                        while(af_roll){}
+                        break;
+                    case 2: exitRoom(sock); in_room = 0; break;
+                    default: printf("\nKhong ro cau lenh.\n"); break;
+                }
+                if(choice == 2 || state == IN_GAME) break;
             }
-            if(choice == 2 || state == IN_GAME) break;
         }
     }
     while(state == IN_GAME){
@@ -264,6 +266,31 @@ void* recv_handler(void* recv_sock){
                 my_room->inroom_no += 1;
                 room_updating = 1;
                 printf("%s joined", msg[2]);                
+                printRoom(my_room, current_user->username);
+                room_updating = 0;
+                continue;
+            }
+            if(strcmp(msg[1], "ALLEXIT") == 0){
+                system("clear");
+                printf("\nChu phong %s roi phong. Phong choi giai tan !\nNhan '1' de quay lai trang chu: \n", msg[2]);
+                Room* room = my_room;
+                freeRoom(room);
+                my_room = NULL;
+                state = LOGGED_IN;
+                in_room = 0;
+                continue;
+            }
+            if(strcmp(msg[1], "EXIT") == 0){
+                int i = 0;
+                while(strcmp(msg[2], my_room->players[i]) != 0) i++;
+                while(i < my_room->inroom_no - 1){
+                    strcpy(my_room->players[i], my_room->players[i+1]);
+                    i++;
+                }
+                my_room->inroom_no -= 1;
+                room_updating = 1;
+                system("clear");
+                printf("\n%s left\n", msg[2]);
                 printRoom(my_room, current_user->username);
                 room_updating = 0;
                 continue;

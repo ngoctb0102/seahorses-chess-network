@@ -318,7 +318,7 @@ void *connection_handler(void *client_sockets){
 				sprintf(buff1, "-%d-%s-%d", i, rooms[i]->players[0], rooms[i]->inroom_no);
 				strcat(buff, buff1);
 			}
-			puts(buff);
+			printf("\n> Send: %s");
 			send(current_user->recv_sock, buff, SEND_RECV_LEN, 0);
 			continue;
 		}
