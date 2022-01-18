@@ -110,9 +110,8 @@ int main(int argc, const char* args[])
 
 		puts("Handler assigned\n");
 		no_threads++;
-
-
 	}
+	
 	int k=0;
 	for (k=0; k < MAX_CLIENT_ALLOWED; k++){
 		pthread_join(threads[k],NULL);
@@ -182,7 +181,7 @@ void *connection_handler(void *client_sockets){
 			logout(msg, &current_user);
 			continue;
 		}
-		if(strcmp(msg[0], "newroom") == 0){ // message prefix
+		if(strcmp(msg[0], "NEWROOM") == 0){ // message prefix
 			userCreateRoom(msg, &current_user);
 			continue;
 		}

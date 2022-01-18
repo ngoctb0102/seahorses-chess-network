@@ -10,7 +10,7 @@ extern Room* my_room;
 
 void requestCreateRoom(int sock);
 
-void requestJoinRoom();
+int requestJoinRoom();
 
 void requestFindRoom();
 
