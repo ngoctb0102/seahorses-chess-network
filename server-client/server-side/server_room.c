@@ -45,6 +45,7 @@ void userExitRoom(char** msg, UserNode** current_user){
 			}
 		}
 		delRoom(rooms, (*current_user)->room_id);
+		current_no_room -= 1;
 	}
 	// If exit one is not owner: update room and inform other players. 
 	else {
@@ -63,7 +64,6 @@ void userExitRoom(char** msg, UserNode** current_user){
 			send(user_in_room->recv_sock, buff, sizeof(buff), 0);
 		}
 	}
-	current_no_room -= 1;
 }
 
 void userJoinRoom(char** msg, UserNode** current_user){
