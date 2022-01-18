@@ -31,38 +31,34 @@ Room* createJoinRoom(char** msg){
 }
 
 void requestCreateRoom(int sock){
-    // TODO
     char buff[100];
-    char res[100];
-    char* melted_msg[10];
-    strcpy(buff, "newroom");                 // message
-    strcat(buff, "-");                       //
-    strcat(buff, current_user->username);    //
+    sprintf(buff, "NEWROOM-%s", current_user->username);
     send(sock, buff, SEND_RECV_LEN, 0);
     state = WAITING_RESPONSE;
 }
 
-void requestJoinRoom(int sock){
-    send(sock, "ROOMS", SEND_RECV_LEN, 0);
-    // char buff[100];
-    // char res[100];
-    // char* melted_msg[10];
-    // int room_id;
-    // printf("> Nhap ma so phong ban muon tham gia: "); scanf("%d", &room_id);
-    // snprintf(buff, sizeof(buff), "JOINROOM-%s-%d", current_user->username, room_id); // message
-    // send(sock, buff, SEND_RECV_LEN, 0);
-    state = WAITING_RESPONSE;
-    // recv(sock, res, SEND_RECV_LEN, 0);
-    // meltMsg(res, melted_msg);
-    // if(strcmp(melted_msg[0], "JOINROOM") == 0){ // message
-    //     if(strcmp(melted_msg[1], "SUCCESS") == 0){ // message
-    //         printf("\n>> From server: Tham gia phong thanh cong\n");
-    //         my_room = createJoinRoom(melted_msg);
-    //     }
-    //     else if(strcmp(melted_msg[1], "FULL") == 0) // message
-    //         printf("\n >> From server: So nguoi choi trong phong da dat toi da.\n");
-    //     else printf("\n >> From server: Tham gia phong khong thanh cong\n");
-    // }
+int requestJoinRoom(int sock){
+    char buff[BUFFSIZE];
+    while(1){
+        while(state == WAITING_RESPONSE);
+        send(sock, "ROOMS", SEND_RECV_LEN, 0);
+        state = WAITING_RESPONSE;
+        while(state == WAITING_RESPONSE);
+        int join_id = -99;
+        printf("\n> Moi nhap ma so phong tham gia (nhap '-1' de thoat): ");
+        scanf("%d%*c", &join_id);
+        if(join_id == -1) {
+            return 0;
+        }
+        else {
+            sprintf(buff, "JOINROOM-%s-%d", current_user->username, join_id);
+            send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
+            state = WAITING_RESPONSE;
+            while(state == WAITING_RESPONSE);
+            if(state == IN_ROOM) break;
+        }
+    }
+    return 1;
 }
 
 void exitRoom(int sock){

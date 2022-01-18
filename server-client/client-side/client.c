@@ -114,16 +114,14 @@ void home(int sock){
         switch(choice){
             case 1: 
                 requestCreateRoom(sock);
-                // if(my_room != NULL)
                 roomLobby(sock);
                 while(in_room){}
                 break;
             case 2: 
-                requestJoinRoom(sock); 
-                // if(my_room != NULL)
-                roomLobby(sock);
-                while(in_room){}
-                // game(sock);
+                if(requestJoinRoom(sock)){ 
+                    roomLobby(sock);
+                    while(in_room){}
+                }
                 break;
             case 3: requestLogout(sock); break;
             default: printf("\nLa sao? Nhap lai coi\n"); break;
@@ -134,7 +132,6 @@ void home(int sock){
 void roomLobby(int sock){
     int choice;
     while(state == IN_ROOM || state == WAITING_RESPONSE){
-        // if(state == IN_ROOM && room_updating == 0){
         if(state == IN_GAME) break;
         if(state == IN_ROOM && room_updating == 0){
             if(state != IN_GAME){
@@ -176,7 +173,6 @@ void* send_handler(void* send_sock){
     int send_socket = *(int*) send_sock;
     int choice;
     while(state == WAITING_RESPONSE || state == NOT_LOGGED_IN) {
-        //system("clear");
         if(state == NOT_LOGGED_IN){
             printf("\n-------------GAME CA NGUA SIEU CAP VJPRO-------------");
             printf("\n1. Dang nhap");
@@ -251,10 +247,6 @@ void* recv_handler(void* recv_sock){
                 continue;
             }
         }
-        if(strcmp(msg[0], "FROM") == 0){ // experiment
-            printf("\nFrom %s: %s\n", msg[1], msg[2]);
-            continue;
-        }
         if(strcmp(msg[0], "NEWROOM") == 0){
             if(strcmp(msg[1], "SUCCESS") == 0){
                 room_updating = 1;
@@ -306,7 +298,6 @@ void* recv_handler(void* recv_sock){
         if(strcmp(msg[0], "START") == 0){
             printChessBoard("************************************************123456123456123456123456");
             printf("\n");
-            // gameplay();
             printf("neu ban khong phai chu phong bam 1 de xac nhan vao game\n");
             printf("neu da bam 1 lan xin hay doi den luot !!\n");
             state = IN_GAME;
@@ -324,9 +315,6 @@ void* recv_handler(void* recv_sock){
         if(strcmp(msg[0], MOVES) == 0){
             int choice = 0;
             int option = msg[1][0] - 48;
-            // printf("<%s>", msg[1]);
-            // do{
-            // roll_control = 1;
             if(option == 0){
                 printf("Ban khong co con ngua nao di chuyen duoc\n");
                 char buff[BUFFSIZE];
@@ -334,9 +322,7 @@ void* recv_handler(void* recv_sock){
                 buff[6] = msg[1][1];
                 buff[7] = '-';
                 buff[8] = msg[1][3];
-                // printf("----%s---",buff);
                 send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
-                // printf("\n----aaa");
             }else{
                 for(int i = 0; i < option;i++){
                     printf("\nBan co the di chuyen cac quan sau:\n%d: ",i+1);
@@ -361,7 +347,6 @@ void* recv_handler(void* recv_sock){
                     buff[6] = msg[1][3*(choice-1)+1];
                     buff[7] = '-';
                     buff[8] = msg[1][3*(choice-1)+3];
-                    // printf("%s---------\n",buff);
                     send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
                 }
             }
@@ -399,11 +384,8 @@ void* recv_handler(void* recv_sock){
             for(int i = 0; i < room_no; i++){
                 printf("\n%-5s|%-20s|%s/4", msg[2+3*i], msg[3+3*i], msg[4+3*i]);
             }
-            printf("\n============================================================");
-            printf("\n> Moi nhap ma so phong ban muon tham gia: ");
-            scanf("%d%*c", &room_id);
-            sprintf(buff, "JOINROOM-%s-%d", current_user->username, room_id);
-            send(current_user->send_sock, buff, SEND_RECV_LEN, 0);
+            printf("\n=============================================================");
+            state = LOGGED_IN;
             continue;
         }
     }
