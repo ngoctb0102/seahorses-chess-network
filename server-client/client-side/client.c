@@ -109,9 +109,7 @@ void home(int sock){
         printf("\nXin chao %s", current_user->username);
         printf("\n1. Tao phong");
         printf("\n2. Tham gia phong");
-        printf("\n3. Tim phong choi");
-        printf("\n4. Thoat");
-        printf("\n5. send something");
+        printf("\n3. Thoat");
         printf("\nLua chon cua ban: "); scanf("%d%*c", &choice);
         switch(choice){
             case 1: 
@@ -127,12 +125,10 @@ void home(int sock){
                 while(in_room){}
                 // game(sock);
                 break;
-            case 3: requestFindRoom(sock); break;
-            case 4: request_logout(sock); break;
-            case 5: send(sock, "TO-tuanvu-hi i am long", SEND_RECV_LEN, 0); break;
+            case 3: requestLogout(sock); break;
             default: printf("\nLa sao? Nhap lai coi\n"); break;
         }
-    } while(choice != 4);
+    } while(choice != 3);
 }
 
 void roomLobby(int sock){
@@ -189,12 +185,12 @@ void* send_handler(void* send_sock){
             printf("\nLua chon cua ban: "); scanf("%d", &choice);
             switch(choice){
                 case 1:
-                    if(request_login(send_socket)){
+                    if(requestLogin(send_socket)){
                         home(send_socket);
                     }
                     break;
                 case 2:
-                    if(request_signup(send_socket)){
+                    if(requestSignup(send_socket)){
                         home(send_socket);
                     }
                     break;
@@ -294,10 +290,12 @@ void* recv_handler(void* recv_sock){
             }
             else if(strcmp(msg[1], "FULL") == 0) {// message
                 printf("\n >> From server: So nguoi choi trong phong da dat toi da.\n");
+                state = LOGGED_IN;
                 continue;
             }
             else { 
                 printf("\n >> From server: Tham gia phong khong thanh cong\n");
+                state = LOGGED_IN;
                 continue;
             }
         }
@@ -395,14 +393,14 @@ void* recv_handler(void* recv_sock){
             int room_id;
             char buff[BUFFSIZE];
             system("clear");
-            printf("\t\tDanh sach cac phong\n");
-            printf("\nID\tChu phong\tSo nguoi choi");
+            printf("\n%-62s", "=====================Danh sach cac phong=====================");
+            printf("\n%-5s|%-20s|%s", "ID", "Chu phong", "So nguoi choi");
             int room_no = atoi(msg[1]);
             for(int i = 0; i < room_no; i++){
-                printf("\n%s%20s%s", msg[2+3*i], msg[3+3*i], msg[4+3*i]);
+                printf("\n%-5s|%-20s|%s/4", msg[2+3*i], msg[3+3*i], msg[4+3*i]);
             }
-            printf("\n");
-            printf("> Moi nhap ma so phong ban muon tham gia: ");
+            printf("\n============================================================");
+            printf("\n> Moi nhap ma so phong ban muon tham gia: ");
             scanf("%d%*c", &room_id);
             sprintf(buff, "JOINROOM-%s-%d", current_user->username, room_id);
             send(current_user->send_sock, buff, SEND_RECV_LEN, 0);

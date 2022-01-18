@@ -11,7 +11,7 @@
 extern UserNode* current_user;
 
 // -------------- Request -------------------
-int request_login(int sock){
+int requestLogin(int sock){
     char username[100];
     char password[100];
     char message[256];
@@ -34,7 +34,7 @@ int request_login(int sock){
     return 1;
 }
 
-void request_logout(int sock){
+void requestLogout(int sock){
     char buff[100];
     strcpy(buff, "logout-");                // message created in these 2 lines
     strcat(buff, current_user->username);   //
@@ -42,7 +42,7 @@ void request_logout(int sock){
     state = WAITING_RESPONSE;
 }
 
-int request_signup(int sock){
+int requestSignup(int sock){
     char username[100];
     char password[100];
     char repassword[100];
@@ -67,8 +67,4 @@ int request_signup(int sock){
         }
     }
     return 1;
-}
-
-// -------------- Reply ---------------------
-int login(int sock){
 }
