@@ -209,12 +209,12 @@ void* recv_handler(void* recv_sock){
     int recv_socket = *(int*) recv_sock;
     int recv_bytes;
     char buff[LEN];
-    char* msg[10];
+    char* msg[MSG_NUM];
     while((recv_bytes = recv(recv_socket, buff, SEND_RECV_LEN, 0) > 0)){
         meltMsg(buff, msg);
         if(strcmp(msg[0], "LOGIN") == 0){
             if(strcmp(msg[1], "SUCCESS") == 0){
-                puts("\nlogin sucess");
+                puts("\nDang nhap thanh cong");
                 current_user = createUserNode(msg[2], msg[3]);
                 current_user->recv_sock = client_recv;
                 current_user->send_sock = client_send;
@@ -222,7 +222,12 @@ void* recv_handler(void* recv_sock){
                 continue;
             }
             if(strcmp(msg[1], "FAILED") == 0){
-                puts("\nlogin failed.");
+                if(strcmp(msg[2], "NONEXIST") == 0 || strcmp(msg[2], "WRONGPASS") == 0){
+                    puts("\nTen nguoi dung hoac mat khau khong chinh xac.");
+                } else {
+                    puts("\n Nguoi dung da hoat dong tren he thong.");
+                }
+                //puts("\nlogin failed.");
                 state = NOT_LOGGED_IN;
                 continue;
             }
@@ -252,6 +257,7 @@ void* recv_handler(void* recv_sock){
         if(strcmp(msg[0], "NEWROOM") == 0){
             if(strcmp(msg[1], "SUCCESS") == 0){
                 room_updating = 1;
+                system("clear");
                 my_room = createRoom(atoi(msg[2]), current_user->username);
                 printRoom(my_room, current_user->username);
                 state = IN_ROOM;
@@ -301,19 +307,21 @@ void* recv_handler(void* recv_sock){
                 my_room = createJoinRoom(msg);
                 room_updating = 1;
                 system("clear");
-                printf("\n>> From server: Tham gia phong thanh cong\n");
+                printf("\n>> Tham gia phong thanh cong\n");
                 printRoom(my_room, current_user->username);
                 state = IN_ROOM;
                 room_updating = 0;
                 continue;
             }
             else if(strcmp(msg[1], "FULL") == 0) {// message
-                printf("\n >> From server: So nguoi choi trong phong da dat toi da.\n");
+                printf("\n>> So nguoi choi trong phong da dat toi da ... Thong bao tu dong dong sau 3s\n");
+                sleep(3);
                 state = LOGGED_IN;
                 continue;
             }
             else { 
-                printf("\n >> From server: Tham gia phong khong thanh cong\n");
+                printf("\n>> Tham gia phong khong thanh cong ... Thong bao tu dong dong sau 3s\n");
+                sleep(3);
                 state = LOGGED_IN;
                 continue;
             }

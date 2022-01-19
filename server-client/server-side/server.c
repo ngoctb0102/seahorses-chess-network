@@ -16,7 +16,7 @@
 #include "../message.h"
 #include "server.h"
 
-#define MSG_NUM 10
+
 
 //------------------Globals----------------------
 
@@ -169,7 +169,7 @@ void *connection_handler(void *client_sockets){
 		}
 
 		meltMsg(client_message, msg);
-		if(strcmp(msg[0], "lgi") == 0){ // message prefix
+		if(strcmp(msg[0], "LOGIN") == 0){ // message prefix
 			current_user = login(msg, client_send_sock, client_recv_sock);
 			continue;
 		}
@@ -177,7 +177,7 @@ void *connection_handler(void *client_sockets){
 			signup(msg, &current_user, client_send_sock, client_recv_sock);
 			continue;
 		}
-		if(strcmp(msg[0], "logout") == 0){ // message prefix
+		if(strcmp(msg[0], "LOGOUT") == 0){ // message prefix
 			logout(msg, &current_user);
 			continue;
 		}
@@ -185,7 +185,7 @@ void *connection_handler(void *client_sockets){
 			userCreateRoom(msg, &current_user);
 			continue;
 		}
-		if(strcmp(msg[0], "exitroom") == 0){ // message prefix
+		if(strcmp(msg[0], "EXITROOM") == 0){ // message prefix
 			userExitRoom(msg, &current_user);
 			continue;
 		}
@@ -318,7 +318,7 @@ void *connection_handler(void *client_sockets){
 				sprintf(buff1, "-%d-%s-%d", i, rooms[i]->players[0], rooms[i]->inroom_no);
 				strcat(buff, buff1);
 			}
-			printf("\n> Send: %s");
+			printf("\n> Send: %s", buff);
 			send(current_user->recv_sock, buff, SEND_RECV_LEN, 0);
 			continue;
 		}
