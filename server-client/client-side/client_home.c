@@ -63,7 +63,7 @@ int requestJoinRoom(int sock){
 
 void exitRoom(int sock){
     char buff[100];
-    snprintf(buff, sizeof(buff), "exitroom-%s-%d", current_user->username, my_room->room_id); // message
+    snprintf(buff, sizeof(buff), "EXITROOM-%s-%d", current_user->username, my_room->room_id); // message
     send(sock, buff, SEND_RECV_LEN, 0);
     Room* node = my_room;
     freeRoom(node);

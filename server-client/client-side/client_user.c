@@ -23,7 +23,7 @@ int requestLogin(int sock){
             if(strcmp(username, "quit") == 0)
                 return 0;
             printf("> Mat khau: "); scanf("%s", password);
-            strcpy(message, "lgi-");        // message
+            strcpy(message, "LOGIN-");        // message
             strcat(message, username);      // message created in these 4 lines
             strcat(message, "-");           //
             strcat(message, password);      //
@@ -36,7 +36,7 @@ int requestLogin(int sock){
 
 void requestLogout(int sock){
     char buff[100];
-    strcpy(buff, "logout-");                // message created in these 2 lines
+    strcpy(buff, "LOGOUT-");                // message created in these 2 lines
     strcat(buff, current_user->username);   //
     send(sock, buff, SEND_RECV_LEN, 0);
     state = WAITING_RESPONSE;

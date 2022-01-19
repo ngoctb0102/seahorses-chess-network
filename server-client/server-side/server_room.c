@@ -87,6 +87,9 @@ void userJoinRoom(char** msg, UserNode** current_user){
 	strcpy(joinroom->players[joinroom->inroom_no], (*current_user)->username);
 	joinroom->inroom_no += 1;
 	(*current_user)->room_id = joinroom->room_id;
+	(*current_user)->status = INROOM;
+	UserNode* user = searchUser(users, (*current_user)->username);
+	user->status = INROOM;
 	snprintf(buff, sizeof(buff), "JOINROOM-SUCCESS-%s", roomToString(rooms, room_id));
 	send((*current_user)->recv_sock, buff, sizeof(buff), 0);
 
