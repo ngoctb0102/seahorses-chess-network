@@ -362,14 +362,14 @@ void* recv_handler(void* recv_sock){
                 for(int i = 0; i < option;i++){
                     printf("\nBan co the di chuyen cac quan sau:\n%d: ",i+1);
                     if(msg[1][3*i + 2]-48 == 0){
-                        printf("Xuat quan thu %d\n",msg[1][3*i + 1]);
+                        printf("Xuat quan thu %d\n",msg[1][3*i + 1]-48);
                     }else if(msg[1][3*i + 2]-48 == 1){
-                        printf("Quan thu %d tien len %d\n",msg[1][3*i + 1],msg[1][3*i + 3]-48);
+                        printf("Quan thu %d tien len %d\n",msg[1][3*i + 1]-48,msg[1][3*i + 3]-48);
                     }else{
-                        printf("Quan thu %d len chuong\n",msg[1][3*i + 1]);
+                        printf("Quan thu %d len chuong\n",msg[1][3*i + 1]-48);
                     }
                 }
-                printf("Moi ban lua chon: (bam cac so khac la bo luot !!)"); 
+                printf("Moi ban lua chon: (bam cac so khac la bo luot !!)\n"); 
                 scanf("%d", &choice);
                 int c;
                 while((c = getchar()) != '\n' && c != EOF);
